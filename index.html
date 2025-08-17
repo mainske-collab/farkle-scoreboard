@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <!-- This viewport meta tag is critical for responsiveness -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Farkle Scoreboard</title>
+    <!-- Include Tailwind CSS via CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Use Inter font from Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+      body {
+        font-family: 'Inter', sans-serif;
+        /* Set a dark background and a minimum height to fill the screen */
+        background-color: #1a202c; /* Equivalent to dark:bg-gray-900 */
+        min-height: 100vh;
+      }
+      #root {
+        min-height: 100vh;
+      }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <!-- React and Babel for JSX in the browser -->
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+    <!-- Firebase SDKs - Must be a separate module script -->
+    <script type="module">
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+      import { getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+      import { getFirestore, doc, onSnapshot, setDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+      
+      // These variables are provided by the canvas environment.
+      // The `__firebase_config` and `__initial_auth_token` are used directly in the code.
+      // Define a fallback in case the code is run outside of this environment.
+      const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {
+        apiKey: "AIzaSyClININqtn0HoO3ovVj8nJPlWKn9N5Lx90",
+        authDomain: "farkle-scoreboard-afe9e.firebaseapp.com",
+        projectId: "farkle-scoreboard-afe9e",
+        storageBucket: "farkle-scoreboard-afe9e.firebasestorage.app",
+        messagingSenderId: "844417315192",
+        appId: "1:844417315192:web:7dc7ea54edae9df6c6588d",
+        measurementId: "G-2N90ZMMJYC"
+      };
+
+      const app = initializeApp(firebaseConfig);
+      // Expose Firebase objects and functions on the window object
+      window.db = getFirestore(app);
+      window.auth = getAuth(app);
+      window.onAuthStateChanged = onAuthStateChanged;
+      window.signInAnonymously = signInAnonymously;
+      window.signInWithCustomToken = signInWithCustomToken;
+      window.doc = doc;
+      window.onSnapshot = onSnapshot;
+      window.setDoc = setDoc;
+    </script>
+    
+    <!-- Main App Component -->
+    <script type="text/babel">
+        // Destructure React hooks at the top level for proper access
+        const { useState, useEffect, useRef } = React;
+
+        // The main application component
+        const App = () => {
+          // Collection name for the scoreboard data
+          const COLLECTION_NAME = 'farkle_scores';
+
+          // Inline SVG icons
+          const PlusIcon = ({ className }) => (
+            <svg xmlns="http://www.w3.org/2000/svg" className={className} viewBox="0 0 24 24" fill="currentColor">
+              <path d="M19 11h-6V5h-2v6H5v2h6v6h2v-6h6z" />
+            </svg>
+          );
+
+          const TrophyIcon = ({ className }) => (
+            <svg xmlns="http://www.w3.org/2000/svg" className={className} viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12 2c-3.31 0-6 2.69-6 6v3H4a2 2 0 00-2 2v7a2 2 0 002 2h16a2 2 0 002-2v-7a2 2 0 00-2-2h-2V8c0-3.31-2.69-6-6-6zm-4 9h8V8c0-2.21-1.79-4-4-4s-4 1.79-4 4v3zm12 9H4v-7h16v7z" />
+              <path d="M10 14h4v4h-4z" />
+            </svg>
+          );
+
+          const DiceIcon = ({ className }) => (
+            <svg xmlns="http://www.w3.org/2000/svg" className={className} viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12 2c-5.52 0-10 4.48-10 10s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zM8 8.5c-.83 0-1.5-.67-1.5-1.5S7.17 5.5 8 5.5s1.5.67 1.5 1.5S8.83 8.5 8 8.5zm8 0c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5S16.83 8.5 16 8.5zm-4 4c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5S12.83 12.5 12 12.5zm-4 4c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5S8.83 16.5 8 16.5zm8 0c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5S16.83 16.5 16 16.5z" />
+            </svg>
+          );
+
+          const [players, setPlayers] = useState([]);
+          const [isAuthReady, setIsAuthReady] = useState(false);
+          const [userId, setUserId] = useState(null);
+          const [loading, setLoading] = useState(true);
+          const [currentView, setCurrentView] = useState('scorer');
+          const [error, setError] = useState(null);
+          const [showConfirm, setShowConfirm] = useState(false);
+          const [confirmAction, setConfirmAction] = useState(null);
+
+          // Refs to hold the input values without causing re-renders
+          const nameInputRef = useRef(null);
+          const scoreInputRefs = useRef({});
+
+          // Function to handle the custom confirmation dialog
+          const handleConfirm = (action) => {
+            setConfirmAction(() => action); // Use a function to set the state
+            setShowConfirm(true);
+          };
+
+          // Function to handle the confirmation dialog's decision
+          const handleConfirmDecision = (decision) => {
+            if (decision && confirmAction) {
+              confirmAction();
+            }
+            setShowConfirm(false);
+            setConfirmAction(null);
+          };
+
+          // A more robust useEffect to handle authentication and data fetching
+          useEffect(() => {
+              // Check for necessary global Firebase objects
+              if (!window.auth || !window.db) {
+                  setError('Firebase SDK is not available. Please wait for the script to load.');
+                  setLoading(false);
+                  return;
+              }
+
+              const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+              let unsubscribeFirestore = () => {};
+
+              // Use onAuthStateChanged to handle authentication state changes gracefully
+              const unsubscribeAuth = window.onAuthStateChanged(window.auth, (user) => {
+                  if (user) {
+                      const currentUserId = user.uid;
+                      setUserId(currentUserId);
+                      setIsAuthReady(true);
+                      
+                      // Set up the Firestore listener only after a user is authenticated
+                      // This ensures a valid userId is present for the Firestore path
+                      const docRef = window.doc(window.db, `artifacts/${appId}/users/${currentUserId}/${COLLECTION_NAME}/scoreboard`);
+                      
+                      unsubscribeFirestore = window.onSnapshot(docRef, (docSnap) => {
+                          try {
+                              if (docSnap.exists()) {
+                                  const data = docSnap.data();
+                                  const fetchedPlayers = data.players || [];
+                                  const sortedPlayers = fetchedPlayers.sort((a, b) => b.score - a.score);
+                                  setPlayers(sortedPlayers);
+                              } else {
+                                  // Create the document if it doesn't exist
+                                  window.setDoc(docRef, { players: [] });
+                                  setPlayers([]);
+                              }
+                          } catch (e) {
+                              setError('Failed to fetch data: ' + e.message);
+                              console.error("Firestore Read Error:", e);
+                          } finally {
+                              setLoading(false);
+                          }
+                      }, (e) => {
+                          setError('Real-time updates failed: ' + e.message);
+                          console.error("Firestore onSnapshot Error:", e);
+                          setLoading(false);
+                      });
+                  } else {
+                      // No user is signed in. Stop loading state and detach listener if any.
+                      setUserId(null);
+                      setIsAuthReady(true);
+                      setLoading(false);
+                      unsubscribeFirestore();
+                  }
+              });
+
+              // Initiate sign-in process
+              const signIn = async () => {
+                  try {
+                      if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                          await window.signInWithCustomToken(window.auth, __initial_auth_token);
+                      } else {
+                          await window.signInAnonymously(window.auth);
+                      }
+                  } catch (e) {
+                      console.error("Sign-in process failed:", e);
+                      setError('Sign-in failed: ' + e.message);
+                      setLoading(false);
+                  }
+              };
+              signIn();
+
+              // The cleanup function for both listeners
+              return () => {
+                  unsubscribeAuth();
+                  unsubscribeFirestore();
+              };
+          }, []); // Empty dependency array means this effect runs only once on mount
+
+          // Handler to add a new player
+          const handleAddPlayer = async () => {
+            const newPlayerName = nameInputRef.current.value.trim();
+            if (newPlayerName === '') return;
+            if (!userId) {
+              setError("Cannot add player: user not authenticated.");
+              return;
+            }
+
+            try {
+              const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+              const docRef = window.doc(window.db, `artifacts/${appId}/users/${userId}/${COLLECTION_NAME}/scoreboard`);
+              const newPlayers = [...players, { name: newPlayerName, score: 0, id: crypto.randomUUID() }];
+              await window.setDoc(docRef, { players: newPlayers }, { merge: true });
+              nameInputRef.current.value = '';
+            } catch (e) {
+              setError('Failed to add player: ' + e.message);
+              console.error("Firestore Add Player Error:", e);
+            }
+          };
+
+          // Handler to update a player's score
+          const handleUpdateScore = async (playerIndex) => {
+            const inputElement = scoreInputRefs.current[playerIndex];
+            const scoreToAdd = parseInt(inputElement.value, 10);
+            
+            if (isNaN(scoreToAdd) || scoreToAdd <= 0) {
+              return;
+            }
+            if (!userId) {
+              setError("Cannot update score: user not authenticated.");
+              return;
+            }
+
+            try {
+              const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+              const docRef = window.doc(window.db, `artifacts/${appId}/users/${userId}/${COLLECTION_NAME}/scoreboard`);
+              
+              const updatedPlayers = players.map((player, index) =>
+                index === playerIndex
+                  ? { ...player, score: player.score + scoreToAdd }
+                  : player
+              );
+              
+              await window.setDoc(docRef, { players: updatedPlayers }, { merge: true });
+              inputElement.value = '';
+            } catch (e) {
+              setError('Failed to update score: ' + e.message);
+              console.error("Firestore Update Score Error:", e);
+            }
+          };
+
+          // Handler to reset the scores
+          const handleResetScores = async () => {
+            if (!userId) {
+              setError("Cannot reset scores: user not authenticated.");
+              return;
+            }
+
+            try {
+              const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+              const docRef = window.doc(window.db, `artifacts/${appId}/users/${userId}/${COLLECTION_NAME}/scoreboard`);
+              const resetPlayers = players.map(player => ({ ...player, score: 0 }));
+              await window.setDoc(docRef, { players: resetPlayers });
+              setShowConfirm(false); // Close modal
+            } catch (e) {
+              setError('Failed to reset scores: ' + e.message);
+              console.error("Firestore Reset Error:", e);
+            }
+          };
+          
+          // Handler to delete a player
+          const handleDeletePlayer = async (playerIndex) => {
+            if (!userId) {
+              setError("Cannot delete player: user not authenticated.");
+              return;
+            }
+            
+            try {
+              const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+              const docRef = window.doc(window.db, `artifacts/${appId}/users/${userId}/${COLLECTION_NAME}/scoreboard`);
+              const updatedPlayers = players.filter((_, index) => index !== playerIndex);
+              await window.setDoc(docRef, { players: updatedPlayers });
+              setShowConfirm(false); // Close modal
+            } catch (e) {
+              setError('Failed to delete player: ' + e.message);
+              console.error("Firestore Delete Player Error:", e);
+            }
+          };
+
+          // Show a loading screen while authenticating and fetching data
+          if (loading || !isAuthReady) {
+            return (
+              <div className="flex items-center justify-center min-h-screen bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-gray-200">
+                <div className="flex flex-col items-center">
+                  <DiceIcon className="text-6xl animate-spin text-indigo-500" />
+                  <p className="mt-4 text-xl font-semibold">Loading Farkle Scoreboard...</p>
+                  <p className="mt-2 text-sm text-gray-500">
+                    {userId ? `User ID: ${userId}` : 'Authenticating...'}
+                  </p>
+                </div>
+              </div>
+            );
+          }
+
+          // Handle errors
+          if (error) {
+            return (
+              <div className="flex items-center justify-center min-h-screen bg-red-100 text-red-800 p-4 rounded-lg">
+                <p>An error occurred: {error}</p>
+              </div >
+            );
+          }
+
+          // Custom confirmation modal
+          const ConfirmationModal = ({ message, onConfirm, onCancel }) => (
+            <div className="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center z-50">
+              <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-xl max-w-sm mx-auto">
+                <p className="text-lg font-semibold text-gray-800 dark:text-white mb-4">{message}</p>
+                <div className="flex justify-end space-x-4">
+                  <button onClick={onCancel} className="px-4 py-2 rounded-lg text-gray-700 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-700">
+                    Cancel
+                  </button>
+                  <button onClick={onConfirm} className="px-4 py-2 rounded-lg bg-red-500 text-white hover:bg-red-600">
+                    Confirm
+                  </button>
+                </div>
+              </div>
+            </div>
+          );
+
+          // The "Scorer" view for mobile phones
+          const ScorerView = () => (
+            <div className="flex flex-col h-full bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-gray-200 p-4 sm:p-6">
+              <div className="flex justify-between items-center mb-6">
+                <h1 className="text-3xl font-bold">Score Entry</h1>
+                <button
+                  onClick={() => setCurrentView('display')}
+                  className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded-full shadow-lg transition duration-300 ease-in-out transform hover:scale-105"
+                >
+                  <TrophyIcon className="inline-block mr-2 h-5 w-5" /> Display View
+                </button>
+              </div>
+              
+              <div className="mb-6">
+                <h2 className="text-2xl font-semibold mb-2">Add Player</h2>
+                <div className="flex space-x-2">
+                  <input
+                    ref={nameInputRef}
+                    type="text"
+                    placeholder="Enter player name"
+                    className="flex-grow p-3 rounded-lg border-2 border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    onKeyDown={(e) => e.key === 'Enter' && handleAddPlayer()}
+                  />
+                  <button
+                    onClick={handleAddPlayer}
+                    className="bg-green-500 hover:bg-green-600 text-white p-3 rounded-lg shadow-md transition duration-300 ease-in-out transform hover:scale-105"
+                  >
+                    <PlusIcon className="h-6 w-6" />
+                  </button>
+                </div>
+              </div>
+
+              <div className="flex-grow overflow-y-auto">
+                {players.map((player, index) => (
+                  <div key={player.id} className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-md mb-4 flex items-center justify-between">
+                    <div className="flex-grow">
+                      <p className="text-xl font-semibold">{player.name}</p>
+                      <p className="text-lg text-gray-500 dark:text-gray-400">Score: {player.score}</p>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <input
+                        ref={el => scoreInputRefs.current[index] = el}
+                        type="text"
+                        inputMode="numeric"
+                        pattern="[0-9]*"
+                        maxLength="6"
+                        placeholder="Points"
+                        className="w-24 p-2 rounded-lg border-2 border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-700 text-center focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                        onKeyDown={(e) => e.key === 'Enter' && handleUpdateScore(index)}
+                      />
+                      <button
+                        onClick={() => handleUpdateScore(index)}
+                        className="bg-indigo-500 hover:bg-indigo-600 text-white p-3 rounded-lg shadow-md transition duration-300 ease-in-out transform hover:scale-105"
+                      >
+                        <PlusIcon className="h-6 w-6" />
+                      </button>
+                      <button
+                        onClick={() => handleConfirm(() => handleDeletePlayer(index))}
+                        className="bg-red-500 hover:bg-red-600 text-white p-2 rounded-lg shadow-md transition duration-300 ease-in-out transform hover:scale-105"
+                      >
+                        <PlusIcon className="transform rotate-45 h-5 w-5" />
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <div className="mt-6 flex flex-col sm:flex-row justify-center space-y-4 sm:space-y-0 sm:space-x-4">
+                <button
+                  onClick={() => handleConfirm(handleResetScores)}
+                  className="bg-red-500 hover:bg-red-600 text-white font-bold py-3 px-6 rounded-lg shadow-lg transition duration-300 ease-in-out transform hover:scale-105"
+                >
+                  Reset Scores
+                </button>
+                <button
+                  onClick={() => setCurrentView('display')}
+                  className="bg-gray-500 hover:bg-gray-600 text-white font-bold py-3 px-6 rounded-lg shadow-lg transition duration-300 ease-in-out transform hover:scale-105"
+                >
+                  View Scoreboard
+                </button>
+              </div>
+            </div>
+          );
+
+          // The "Display" view for tablets
+          const DisplayView = () => (
+            <div className="flex flex-col h-full bg-gray-900 text-white font-sans p-6 md:p-12">
+              <div className="flex justify-between items-center mb-8">
+                <h1 className="text-4xl md:text-6xl font-extrabold tracking-tight">
+                  Farkle Scoreboard
+                </h1>
+                <button
+                  onClick={() => setCurrentView('scorer')}
+                  className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-6 rounded-full shadow-lg transition duration-300 ease-in-out transform hover:scale-105"
+                >
+                  <DiceIcon className="inline-block mr-2 h-5 w-5" /> Enter Scores
+                </button>
+              </div>
+
+              <div className="flex-grow flex items-center justify-center overflow-y-auto">
+                <div className="w-full max-w-4xl">
+                  {players.length === 0 ? (
+                    <p className="text-center text-gray-400 text-2xl font-semibold">
+                      No players added yet.
+                    </p>
+                  ) : (
+                    <div className="grid grid-cols-1 gap-6">
+                      {players.map((player, index) => (
+                        <div
+                          key={player.id}
+                          className={`flex justify-between items-center p-6 rounded-2xl shadow-xl transition-all duration-300 ease-in-out transform hover:scale-105 ${
+                            index === 0
+                              ? 'bg-gradient-to-r from-yellow-400 to-yellow-600 text-gray-900'
+                              : 'bg-gray-800 border-2 border-gray-700 text-white'
+                          }`}
+                        >
+                          <div className="flex items-center space-x-4">
+                            {index === 0 && <TrophyIcon className="h-8 w-8 text-yellow-900" />}
+                            <p className="text-3xl md:text-4xl font-semibold capitalize">{player.name}</p>
+                          </div>
+                          <p className="text-4xl md:text-5xl font-bold">{player.score}</p>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+              <p className="text-center mt-8 text-gray-500 text-sm">
+                This scoreboard is persistent and tied to your account.
+              </p>
+            </div>
+          );
+
+          // The App component now returns the JSX to be rendered by ReactDOM
+          return (
+            <div className="min-h-screen font-sans">
+              {showConfirm && (
+                <ConfirmationModal
+                  message={
+                    confirmAction === handleResetScores
+                      ? 'Are you sure you want to reset all scores?'
+                      : 'Are you sure you want to remove this player?'
+                  }
+                  onConfirm={() => handleConfirmDecision(true)}
+                  onCancel={() => handleConfirmDecision(false)}
+                />
+              )}
+              {currentView === 'scorer' ? <ScorerView /> : <DisplayView />}
+            </div>
+          );
+        };
+
+        // Initialize the app by rendering the root component on window load
+        window.onload = function() {
+            const rootElement = document.getElementById('root');
+            if (rootElement) {
+                ReactDOM.render(<App />, rootElement);
+            }
+        };
+    </script>
+</body>
+</html>
