@@ -8,11 +8,23 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              gold: {
+                400: '#FFD700',
+              }
+            }
+          }
+        }
+      }
+    </script>
     <style>
         body {
             font-family: 'Inter', sans-serif;
-            /* Set a dark background and a minimum height to fill the screen */
-            background-color: #1a202c; /* Equivalent to dark:bg-gray-900 */
+            background-color: #1a202c;
             min-height: 100vh;
         }
         #root {
@@ -32,9 +44,6 @@
         import { getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, doc, onSnapshot, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
         
-        // These variables are provided by the canvas environment.
-        // The `__firebase_config` and `__initial_auth_token` are used directly in the code.
-        // Define a fallback in case the code is run outside of this environment.
         const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {
             apiKey: "AIzaSyClININqtn0HoO3ovVj8nJPlWKn9N5Lx90",
             authDomain: "farkle-scoreboard-afe9e.firebaseapp.com",
@@ -46,7 +55,6 @@
         };
 
         const app = initializeApp(firebaseConfig);
-        // Expose Firebase objects and functions on the window object
         window.db = getFirestore(app);
         window.auth = getAuth(app);
         window.onAuthStateChanged = onAuthStateChanged;
@@ -55,20 +63,15 @@
         window.doc = doc;
         window.onSnapshot = onSnapshot;
         window.setDoc = setDoc;
-        window.getDoc = getDoc; // MODIFIED: Added getDoc for checking document existence
+        window.getDoc = getDoc;
     </script>
     
     <script type="text/babel">
-        // Destructure React hooks at the top level for proper access
         const { useState, useEffect, useRef } = React;
 
-        // The main application component
         const App = () => {
-            // Collection name for the scoreboard data
-            // MODIFIED: Simplified collection name as we are using a shared game ID
             const COLLECTION_NAME = 'farkle_games';
 
-            // Inline SVG icons
             const PlusIcon = ({ className }) => (
                 <svg xmlns="http://www.w3.org/2000/svg" className={className} viewBox="0 0 24 24" fill="currentColor">
                     <path d="M19 11h-6V5h-2v6H5v2h6v6h2v-6h6z" />
@@ -94,11 +97,10 @@
                 </svg>
             );
             
-            // MODIFIED: Function to generate a random alphanumeric ID
             const generateGameId = () => {
                 const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
                 let result = '';
-                const length = 5; // MODIFIED: 5 characters for brevity and uniqueness
+                const length = 5;
                 for (let i = 0; i < length; i++) {
                     result += characters.charAt(Math.floor(Math.random() * characters.length));
                 }
@@ -114,25 +116,20 @@
             const [showConfirm, setShowConfirm] = useState(false);
             const [confirmAction, setConfirmAction] = useState(null);
             const [confirmMessage, setConfirmMessage] = useState('');
-            // MODIFIED: Add a state for the shared game ID and a loading state for the game
             const [gameId, setGameId] = useState('');
             const [isGameLoading, setIsGameLoading] = useState(false);
             
-            // MODIFIED: Add a ref for the game ID input
             const gameIdInputRef = useRef(null);
             const nameInputRef = useRef(null);
             const scoreInputRefs = useRef({});
-            // MODIFIED: Store the unsubscribe function for the Firestore listener
             const unsubscribeFirestoreRef = useRef(null);
 
-            // Function to handle the custom confirmation dialog
             const handleConfirm = (action, message) => {
-                setConfirmAction(() => action); // Use a function to set the state
+                setConfirmAction(() => action);
                 setConfirmMessage(message);
                 setShowConfirm(true);
             };
 
-            // Function to handle the confirmation dialog's decision
             const handleConfirmDecision = (decision) => {
                 if (decision && confirmAction) {
                     confirmAction();
@@ -141,20 +138,17 @@
                 setConfirmAction(null);
             };
 
-            // MODIFIED: New function to start listening to a specific game ID
             const setupGameListener = (id) => {
                 if (!window.db) {
                     setError('Firestore not initialized.');
                     return;
                 }
 
-                // Clean up previous listener if it exists
                 if (unsubscribeFirestoreRef.current) {
                     unsubscribeFirestoreRef.current();
                 }
 
                 setIsGameLoading(true);
-                // MODIFIED: Use the gameId in the document path
                 const docRef = window.doc(window.db, `${COLLECTION_NAME}/${id}`);
                 
                 unsubscribeFirestoreRef.current = window.onSnapshot(docRef, (docSnap) => {
@@ -165,7 +159,6 @@
                             const sortedPlayers = fetchedPlayers.sort((a, b) => b.score - a.score);
                             setPlayers(sortedPlayers);
                         } else {
-                            // If the document doesn't exist, clear the players
                             setPlayers([]);
                             setError(`Game '${id}' does not exist.`);
                         }
@@ -182,24 +175,21 @@
                 });
             };
 
-            // MODIFIED: New function to create a new game
             const handleCreateGame = async () => {
-                const newGameId = generateGameId(); // MODIFIED: Generate a random ID
+                const newGameId = generateGameId();
                 const docRef = window.doc(window.db, `${COLLECTION_NAME}/${newGameId}`);
                 
                 try {
-                    // Check if a game with this ID already exists (a safety check)
                     const docSnap = await window.getDoc(docRef);
                     if (docSnap.exists()) {
-                        // If it does, recursively try to create a new one
                         handleCreateGame();
                         return;
                     }
                     
                     await window.setDoc(docRef, { players: [] });
                     setGameId(newGameId);
-                    setError(null); // Clear any previous errors
-                    setupGameListener(newGameId); 
+                    setError(null);
+                    setupGameListener(newGameId);
                     console.log(`New game '${newGameId}' created.`);
                 } catch (e) {
                     setError('Failed to create game: ' + e.message);
@@ -207,9 +197,8 @@
                 }
             };
 
-            // MODIFIED: New function to join an existing game
             const handleJoinGame = async () => {
-                const joinGameId = gameIdInputRef.current.value.trim().toUpperCase(); // MODIFIED: Normalize to uppercase
+                const joinGameId = gameIdInputRef.current.value.trim().toUpperCase();
                 if (!joinGameId) {
                     setError('Game ID cannot be empty.');
                     return;
@@ -219,7 +208,6 @@
                     return;
                 }
 
-                // Check if the game exists before trying to join
                 const docRef = window.doc(window.db, `${COLLECTION_NAME}/${joinGameId}`);
                 const docSnap = await window.getDoc(docRef);
 
@@ -229,14 +217,12 @@
                 }
 
                 setGameId(joinGameId);
-                setError(null); // Clear any previous errors
+                setError(null);
                 setupGameListener(joinGameId);
                 console.log(`Joined game '${joinGameId}'.`);
             };
 
-            // A more robust useEffect to handle authentication
             useEffect(() => {
-                // Check for necessary global Firebase objects
                 if (!window.auth || !window.db) {
                     setError('Firebase SDK is not available. Please wait for the script to load.');
                     setLoading(false);
@@ -274,17 +260,14 @@
 
                 signIn();
 
-                // The cleanup function for the auth listener
                 return () => {
                     unsubscribeAuth();
-                    // MODIFIED: Also clean up the Firestore listener when the component unmounts
                     if (unsubscribeFirestoreRef.current) {
                         unsubscribeFirestoreRef.current();
                     }
                 };
-            }, []); // Empty dependency array means this effect runs only once on mount
+            }, []);
 
-            // MODIFIED: The following functions now use the gameId state
             const handleAddPlayer = async () => {
                 const newPlayerName = nameInputRef.current.value.trim();
                 if (newPlayerName === '' || !gameId) return;
@@ -331,7 +314,7 @@
                     const docRef = window.doc(window.db, `${COLLECTION_NAME}/${gameId}`);
                     const resetPlayers = players.map(player => ({ ...player, score: 0 }));
                     await window.setDoc(docRef, { players: resetPlayers });
-                    setShowConfirm(false); // Close modal
+                    setShowConfirm(false);
                 } catch (e) {
                     setError('Failed to reset scores: ' + e.message);
                     console.error("Firestore Reset Error:", e);
@@ -345,14 +328,13 @@
                     const docRef = window.doc(window.db, `${COLLECTION_NAME}/${gameId}`);
                     const updatedPlayers = players.filter((_, index) => index !== playerIndex);
                     await window.setDoc(docRef, { players: updatedPlayers });
-                    setShowConfirm(false); // Close modal
+                    setShowConfirm(false);
                 } catch (e) {
                     setError('Failed to delete player: ' + e.message);
                     console.error("Firestore Delete Player Error:", e);
                 }
             };
             
-            // MODIFIED: Added a function to handle leaving the game
             const handleLeaveGame = () => {
                 if (unsubscribeFirestoreRef.current) {
                     unsubscribeFirestoreRef.current();
@@ -363,7 +345,6 @@
                 setError(null);
             };
 
-            // Show a loading screen while authenticating and fetching data
             if (loading || !isAuthReady) {
                 return (
                     <div className="flex items-center justify-center min-h-screen bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-gray-200">
@@ -375,7 +356,6 @@
                 );
             }
 
-            // Handle errors
             if (error) {
                 return (
                     <div className="flex items-center justify-center min-h-screen bg-red-100 text-red-800 p-4 rounded-lg">
@@ -384,7 +364,6 @@
                 );
             }
 
-            // Custom confirmation modal
             const ConfirmationModal = ({ message, onConfirm, onCancel }) => (
                 <div className="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center z-50">
                     <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-xl max-w-sm mx-auto">
@@ -401,7 +380,6 @@
                 </div>
             );
 
-            // MODIFIED: The "GameLobby" component for joining or creating a game
             const GameLobby = ({ onJoin, onCreate }) => (
                 <div className="flex flex-col items-center justify-center h-full p-4 sm:p-6 bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-gray-200">
                     <h1 className="text-3xl font-bold mb-6">Start a New Game</h1>
@@ -425,7 +403,6 @@
                                 className="w-full p-3 rounded-lg border-2 border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-center"
                                 onKeyDown={(e) => {
                                     if (e.key === 'Enter') {
-                                        // MODIFIED: Allow Enter to attempt to join or create
                                         e.preventDefault();
                                         onJoin();
                                     }
@@ -446,7 +423,6 @@
             );
 
 
-            // The "Scorer" view for mobile phones
             const ScorerView = () => {
                 if (!gameId) {
                     return <GameLobby onJoin={handleJoinGame} onCreate={handleCreateGame} />;
@@ -464,7 +440,6 @@
                             </button>
                         </div>
                         
-                        {/* MODIFIED: Display the current game ID */}
                         <div className="flex items-center justify-between mb-4 bg-gray-200 dark:bg-gray-800 p-3 rounded-lg">
                             <p className="font-semibold text-lg">Game ID: <span className="font-bold text-indigo-500">{gameId}</span></p>
                             <button
@@ -558,12 +533,13 @@
                 );
             };
 
-            // The "Display" view for tablets
             const DisplayView = () => {
                 if (!gameId) {
-                    // MODIFIED: The display view should also have a lobby to join a game
                     return <GameLobby onJoin={handleJoinGame} onCreate={handleCreateGame} />;
                 }
+                
+                const winningScore = players.reduce((max, player) => Math.max(max, player.score), 0);
+                const hasWinner = winningScore >= 10000;
                 
                 return (
                     <div className="flex flex-col h-full bg-gray-900 text-white font-sans p-6 md:p-12">
@@ -579,60 +555,60 @@
                             </button>
                         </div>
                         
-                        {/* MODIFIED: Display the current game ID */}
                         <div className="flex items-center justify-between mb-4">
                             <p className="font-semibold text-xl md:text-2xl">Game ID: <span className="font-bold text-yellow-400">{gameId}</span></p>
                             <button
                                 onClick={handleLeaveGame}
-                                className="text-red-400 hover:text-red-600 text-sm font-semibold"
+                                className="text-red-500 hover:text-red-700 text-sm font-semibold"
                             >
                                 Leave Game
                             </button>
                         </div>
-                        
-                        <div className="flex-grow flex items-center justify-center overflow-y-auto">
-                            <div className="w-full max-w-4xl">
-                                {isGameLoading ? (
-                                    <div className="flex flex-col items-center">
-                                        <DiceIcon className="text-6xl animate-spin text-yellow-400" />
-                                        <p className="mt-4 text-xl font-semibold">Loading game data...</p>
-                                    </div>
-                                ) : players.length === 0 ? (
-                                    <p className="text-center text-gray-400 text-2xl font-semibold">
-                                        No players added yet.
-                                    </p>
-                                ) : (
-                                    <div className="grid grid-cols-1 gap-6">
-                                        {players.map((player, index) => (
-                                            <div
-                                                key={player.id}
-                                                className={`flex justify-between items-center p-6 rounded-2xl shadow-xl transition-all duration-300 ease-in-out transform hover:scale-105 ${
-                                                    index === 0
-                                                        ? 'bg-gradient-to-r from-yellow-400 to-yellow-600 text-gray-900'
-                                                        : 'bg-gray-800 border-2 border-gray-700 text-white'
-                                                }`}
-                                            >
-                                                <div className="flex items-center space-x-4">
-                                                    {index === 0 && <TrophyIcon className="h-8 w-8 text-yellow-900" />}
-                                                    <p className="text-3xl md:text-4xl font-semibold capitalize">{player.name}</p>
+
+                        <div className="flex-grow grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 overflow-y-auto">
+                            {isGameLoading ? (
+                                <div className="md:col-span-3 flex flex-col items-center justify-center">
+                                    <DiceIcon className="text-6xl animate-spin text-indigo-500" />
+                                    <p className="mt-4 text-xl font-semibold">Loading game data...</p>
+                                </div>
+                            ) : players.length === 0 ? (
+                                <p className="md:col-span-3 text-center text-gray-400 text-2xl font-semibold">
+                                    No players added yet.
+                                </p>
+                            ) : (
+                                players.map((player, index) => {
+                                    const scoreColor = hasWinner && player.score >= 10000 ? 'text-gold-400' : 'text-white';
+                                    const scoreFontWeight = hasWinner && player.score >= 10000 ? 'font-extrabold' : 'font-bold';
+                                    
+                                    const scoreDifference = player.score - winningScore;
+
+                                    return (
+                                        <div key={player.id} className="bg-gray-800 rounded-xl shadow-lg p-6 flex flex-col items-center text-center transition-all duration-300 transform hover:scale-105">
+                                            <p className="text-2xl md:text-3xl font-semibold text-gray-300 truncate w-full mb-1">{player.name}</p>
+                                            <p className={`text-5xl md:text-6xl ${scoreFontWeight} ${scoreColor} mb-2`}>
+                                                {player.score}
+                                            </p>
+                                            {hasWinner && (
+                                                <div className="mt-2 flex flex-col items-center">
+                                                    {player.score >= 10000 && (
+                                                        <TrophyIcon className="text-gold-400 h-10 w-10 mb-2 animate-bounce" />
+                                                    )}
+                                                    <p className="text-red-400 text-xl font-bold">
+                                                        {scoreDifference}
+                                                    </p>
                                                 </div>
-                                                <p className="text-4xl md:text-5xl font-bold">{player.score}</p>
-                                            </div>
-                                        ))}
-                                    </div>
-                                )}
-                            </div>
+                                            )}
+                                        </div>
+                                    );
+                                })
+                            )}
                         </div>
-                        <p className="text-center mt-8 text-gray-500 text-sm">
-                            Real-time updates.
-                        </p>
                     </div>
                 );
             };
 
-            // The App component now returns the JSX to be rendered by ReactDOM
             return (
-                <div className="min-h-screen font-sans">
+                <div className="min-h-screen flex flex-col bg-gray-100 dark:bg-gray-900">
                     {showConfirm && (
                         <ConfirmationModal
                             message={confirmMessage}
@@ -640,18 +616,14 @@
                             onCancel={() => handleConfirmDecision(false)}
                         />
                     )}
-                    {currentView === 'scorer' ? <ScorerView /> : <DisplayView />}
+                    {currentView === 'scorer' && <ScorerView />}
+                    {currentView === 'display' && <DisplayView />}
                 </div>
             );
         };
 
-        // Initialize the app by rendering the root component on window load
-        window.onload = function() {
-            const rootElement = document.getElementById('root');
-            if (rootElement) {
-                ReactDOM.render(<App />, rootElement);
-            }
-        };
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
     </script>
 </body>
 </html>
