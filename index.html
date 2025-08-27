@@ -565,7 +565,7 @@
                             </button>
                         </div>
 
-                        <div className="flex-grow grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 overflow-y-auto">
+                        <div className="flex-grow grid grid-cols-1 gap-6 overflow-y-auto">
                             {isGameLoading ? (
                                 <div className="md:col-span-3 flex flex-col items-center justify-center">
                                     <DiceIcon className="text-6xl animate-spin text-indigo-500" />
@@ -577,8 +577,9 @@
                                 </p>
                             ) : (
                                 players.map((player, index) => {
-                                    const scoreColor = hasWinner && player.score >= 10000 ? 'text-gold-400' : 'text-white';
-                                    const scoreFontWeight = hasWinner && player.score >= 10000 ? 'font-extrabold' : 'font-bold';
+                                    const winningScore = players[0].score;
+                                    const scoreColor = hasWinner && player.score === winningScore ? 'text-gold-400' : 'text-white';
+                                    const scoreFontWeight = hasWinner && player.score === winningScore ? 'font-extrabold' : 'font-bold';
                                     
                                     const scoreDifference = player.score - winningScore;
 
@@ -590,7 +591,7 @@
                                             </p>
                                             {hasWinner && (
                                                 <div className="mt-2 flex flex-col items-center">
-                                                    {player.score >= 10000 && (
+                                                    {player.score === winningScore && (
                                                         <TrophyIcon className="text-gold-400 h-10 w-10 mb-2 animate-bounce" />
                                                     )}
                                                     <p className="text-red-400 text-xl font-bold">
