@@ -96,6 +96,121 @@
                     <path d="M12 2c-5.52 0-10 4.48-10 10s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zM8 8.5c-.83 0-1.5-.67-1.5-1.5S7.17 5.5 8 5.5s1.5.67 1.5 1.5S8.83 8.5 8 8.5zm8 0c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5S16.83 8.5 16 8.5zm-4 4c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5S12.83 12.5 12 12.5zm-4 4c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5S8.83 16.5 8 16.5zm8 0c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5S16.83 16.5 16 16.5z" />
                 </svg>
             );
+
+            const ScoringGuide = ({ onClose }) => (
+                <div className="fixed inset-0 bg-gray-900 bg-opacity-95 flex flex-col items-center justify-center p-4 z-50 overflow-y-auto">
+                    <div className="bg-gray-800 text-white rounded-lg shadow-xl p-6 md:p-10 max-w-2xl w-full">
+                        <div className="flex justify-between items-center mb-6">
+                            <h2 className="text-3xl md:text-4xl font-bold text-yellow-400">Farkle Scoring</h2>
+                            <button onClick={onClose} className="text-gray-400 hover:text-white transition-colors duration-200">
+                                <CloseIcon className="w-8 h-8 md:w-10 md:h-10" />
+                            </button>
+                        </div>
+                        <div className="overflow-x-auto">
+                            <table className="w-full text-left border-collapse">
+                                <thead>
+                                    <tr>
+                                        <th className="py-2 px-4 border-b-2 border-gray-600 text-gray-400 font-semibold text-sm md:text-base">Combination</th>
+                                        <th className="py-2 px-4 border-b-2 border-gray-600 text-gray-400 font-semibold text-sm md:text-base text-right">Points</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr className="border-b border-gray-700">
+                                        <td className="py-3 px-4 flex items-center">
+                                            <span className="text-2xl font-bold mr-2">1</span> Single One
+                                        </td>
+                                        <td className="py-3 px-4 text-right font-bold text-lg">100</td>
+                                    </tr>
+                                    <tr className="border-b border-gray-700">
+                                        <td className="py-3 px-4 flex items-center">
+                                            <span className="text-2xl font-bold mr-2">5</span> Single Five
+                                        </td>
+                                        <td className="py-3 px-4 text-right font-bold text-lg">50</td>
+                                    </tr>
+                                    <tr className="border-b border-gray-700">
+                                        <td className="py-3 px-4 flex items-center">
+                                            <span className="text-2xl font-bold mr-2">3x1</span> Three of a Kind (Ones)
+                                        </td>
+                                        <td className="py-3 px-4 text-right font-bold text-lg">1000</td>
+                                    </tr>
+                                    <tr className="border-b border-gray-700">
+                                        <td className="py-3 px-4 flex items-center">
+                                            <span className="text-2xl font-bold mr-2">3x2</span> Three of a Kind (Twos)
+                                        </td>
+                                        <td className="py-3 px-4 text-right font-bold text-lg">200</td>
+                                    </tr>
+                                    <tr className="border-b border-gray-700">
+                                        <td className="py-3 px-4 flex items-center">
+                                            <span className="text-2xl font-bold mr-2">3x3</span> Three of a Kind (Threes)
+                                        </td>
+                                        <td className="py-3 px-4 text-right font-bold text-lg">300</td>
+                                    </tr>
+                                    <tr className="border-b border-gray-700">
+                                        <td className="py-3 px-4 flex items-center">
+                                            <span className="text-2xl font-bold mr-2">3x4</span> Three of a Kind (Fours)
+                                        </td>
+                                        <td className="py-3 px-4 text-right font-bold text-lg">400</td>
+                                    </tr>
+                                    <tr className="border-b border-gray-700">
+                                        <td className="py-3 px-4 flex items-center">
+                                            <span className="text-2xl font-bold mr-2">3x5</span> Three of a Kind (Fives)
+                                        </td>
+                                        <td className="py-3 px-4 text-right font-bold text-lg">500</td>
+                                    </tr>
+                                    <tr className="border-b border-gray-700">
+                                        <td className="py-3 px-4 flex items-center">
+                                            <span className="text-2xl font-bold mr-2">3x6</span> Three of a Kind (Sixes)
+                                        </td>
+                                        <td className="py-3 px-4 text-right font-bold text-lg">600</td>
+                                    </tr>
+                                    <tr className="border-b border-gray-700">
+                                        <td className="py-3 px-4 flex items-center">
+                                            <span className="text-2xl font-bold mr-2">4x</span> Four of a Kind
+                                        </td>
+                                        <td className="py-3 px-4 text-right font-bold text-lg">1000</td>
+                                    </tr>
+                                    <tr className="border-b border-gray-700">
+                                        <td className="py-3 px-4 flex items-center">
+                                            <span className="text-2xl font-bold mr-2">5x</span> Five of a Kind
+                                        </td>
+                                        <td className="py-3 px-4 text-right font-bold text-lg">2000</td>
+                                    </tr>
+                                    <tr className="border-b border-gray-700">
+                                        <td className="py-3 px-4 flex items-center">
+                                            <span className="text-2xl font-bold mr-2">6x</span> Six of a Kind
+                                        </td>
+                                        <td className="py-3 px-4 text-right font-bold text-lg">3000</td>
+                                    </tr>
+                                    <tr className="border-b border-gray-700">
+                                        <td className="py-3 px-4 flex items-center">
+                                            <span className="text-2xl font-bold mr-2">1-6</span> Straight (1,2,3,4,5,6)
+                                        </td>
+                                        <td className="py-3 px-4 text-right font-bold text-lg">1500</td>
+                                    </tr>
+                                    <tr className="border-b border-gray-700">
+                                        <td className="py-3 px-4 flex items-center">
+                                            <span className="text-2xl font-bold mr-2">3x Pair</span> Three Pairs (e.g., 2,2, 4,4, 6,6)
+                                        </td>
+                                        <td className="py-3 px-4 text-right font-bold text-lg">1500</td>
+                                    </tr>
+                                    <tr className="border-b border-gray-700">
+                                        <td className="py-3 px-4 flex items-center">
+                                            <span className="text-2xl font-bold mr-2">4+2</span> Four of a kind + Pair
+                                        </td>
+                                        <td className="py-3 px-4 text-right font-bold text-lg">2000</td>
+                                    </tr>
+                                    <tr className="border-b border-gray-700">
+                                        <td className="py-3 px-4 flex items-center">
+                                            <span className="text-2xl font-bold mr-2">2x3</span> Two sets of three of a kind
+                                        </td>
+                                        <td className="py-3 px-4 text-right font-bold text-lg">2500</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            );
             
             const generateGameId = () => {
                 const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
@@ -112,6 +227,7 @@
             const [userId, setUserId] = useState(null);
             const [loading, setLoading] = useState(true);
             const [currentView, setCurrentView] = useState('scorer');
+            const [showScoringGuide, setShowScoringGuide] = useState(false);
             const [error, setError] = useState(null);
             const [showConfirm, setShowConfirm] = useState(false);
             const [confirmAction, setConfirmAction] = useState(null);
@@ -432,12 +548,20 @@
                     <div className="flex flex-col h-full bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-gray-200 p-4 sm:p-6">
                         <div className="flex justify-between items-center mb-6">
                             <h1 className="text-3xl font-bold">Score Entry</h1>
-                            <button
-                                onClick={() => setCurrentView('display')}
-                                className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded-full shadow-lg transition duration-300 ease-in-out transform hover:scale-105"
-                            >
-                                <TrophyIcon className="inline-block mr-2 h-5 w-5" /> Display View
-                            </button>
+                            <div className="flex space-x-2">
+                                <button
+                                    onClick={() => setCurrentView('display')}
+                                    className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded-full shadow-lg transition duration-300 ease-in-out transform hover:scale-105"
+                                >
+                                    <TrophyIcon className="inline-block mr-2 h-5 w-5" /> Display View
+                                </button>
+                                <button
+                                    onClick={() => setShowScoringGuide(true)}
+                                    className="bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded-full shadow-lg transition duration-300 ease-in-out transform hover:scale-105"
+                                >
+                                    Scoring
+                                </button>
+                            </div>
                         </div>
                         
                         <div className="flex items-center justify-between mb-4 bg-gray-200 dark:bg-gray-800 p-3 rounded-lg">
@@ -547,12 +671,20 @@
                             <h1 className="text-4xl md:text-6xl font-extrabold tracking-tight">
                                 Farkle Scoreboard
                             </h1>
-                            <button
-                                onClick={() => setCurrentView('scorer')}
-                                className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-6 rounded-full shadow-lg transition duration-300 ease-in-out transform hover:scale-105"
-                            >
-                                <DiceIcon className="inline-block mr-2 h-5 w-5" /> Enter Scores
-                            </button>
+                            <div className="flex space-x-2">
+                                <button
+                                    onClick={() => setCurrentView('scorer')}
+                                    className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-6 rounded-full shadow-lg transition duration-300 ease-in-out transform hover:scale-105"
+                                >
+                                    <DiceIcon className="inline-block mr-2 h-5 w-5" /> Enter Scores
+                                </button>
+                                <button
+                                    onClick={() => setShowScoringGuide(true)}
+                                    className="bg-gray-500 hover:bg-gray-600 text-white font-bold py-3 px-6 rounded-full shadow-lg transition duration-300 ease-in-out transform hover:scale-105"
+                                >
+                                    Scoring
+                                </button>
+                            </div>
                         </div>
                         
                         <div className="flex items-center justify-between mb-4">
@@ -617,6 +749,7 @@
                             onCancel={() => handleConfirmDecision(false)}
                         />
                     )}
+                    {showScoringGuide && <ScoringGuide onClose={() => setShowScoringGuide(false)} />}
                     {currentView === 'scorer' && <ScorerView />}
                     {currentView === 'display' && <DisplayView />}
                 </div>
