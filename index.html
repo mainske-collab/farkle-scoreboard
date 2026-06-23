@@ -40,12 +40,12 @@
     
     <script src="https://unpkg.com/@babel/standalone@7.23.11/babel.min.js"></script>
 
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 
     <script>
-        console.log("Farkle Scoreboard: Version 1.1.0 Tracking Verified");
+        console.log("Farkle Scoreboard: Version 1.3.0 Engine Initialized");
 
         const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {
             apiKey: "AIzaSyClININqtn0HoO3ovVj8nJPlWKn9N5Lx90",
@@ -57,21 +57,27 @@
             measurementId: "G-2N90ZMMJYC"
         };
 
-        // Initialize and bind globally for your React App to pick up instantly
-        if (!firebase.apps.length) {
-            const app = firebase.initializeApp(firebaseConfig);
-            window.db = firebase.firestore(app);
-            window.auth = firebase.auth(app);
-            
-            // Map legacy aliases straight to compat engine properties
-            window.onAuthStateChanged = (auth, cb) => auth.onAuthStateChanged(cb);
-            window.signInAnonymously = (auth) => auth.signInAnonymously();
-            window.signInWithCustomToken = (auth, token) => auth.signInWithCustomToken(token);
-            window.doc = (db, path) => db.doc(path);
-            window.onSnapshot = (ref, cb, errCb) => ref.onSnapshot(doc => cb({ exists: () => doc.exists, data: () => doc.data() }), errCb);
-            window.setDoc = (ref, data, opts) => ref.set(data, opts);
-            window.getDoc = (ref) => ref.get().then(doc => ({ exists: () => doc.exists, data: () => doc.data() }));
-        }
+        // Initialize globally using traditional properties to align with your app's listeners
+        const app = firebase.initializeApp(firebaseConfig);
+        window.db = firebase.firestore(app);
+        window.auth = firebase.auth(app);
+        
+        // Expose explicit wrapper configurations
+        window.onAuthStateChanged = (authInstance, callback) => authInstance.onAuthStateChanged(callback);
+        window.signInAnonymously = (authInstance) => authInstance.signInAnonymously();
+        window.signInWithCustomToken = (authInstance, token) => authInstance.signInWithCustomToken(token);
+        window.doc = (dbInstance, path) => dbInstance.doc(path);
+        window.onSnapshot = (reference, callback, errorCallback) => reference.onSnapshot(snapshot => {
+            callback({
+                exists: snapshot.exists,
+                data: () => snapshot.data()
+            });
+        }, errorCallback);
+        window.setDoc = (reference, payload, options) => reference.set(payload, options);
+        window.getDoc = (reference) => reference.get().then(snapshot => ({
+            exists: snapshot.exists,
+            data: () => snapshot.data()
+        }));
     </script>
     
     <script type="text/babel">
@@ -624,7 +630,7 @@
         };
 
         const root = ReactDOM.createRoot(document.getElementById('root'));
-        root.render(<App />);
+        root.render(React.createElement(App));
     </script>
 </body>
 </html>
