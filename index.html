@@ -38,15 +38,12 @@
     <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     
-    <script src="https://unpkg.com/@babel/standalone@7.23.11/babel.min.js"></script>
-
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 
     <script>
-        console.log("--- ENGINE DIAGNOSTIC START ---");
-        console.log("Farkle Scoreboard: Version 1.4.0 Booting...");
+        console.log("Farkle Scoreboard: Version 1.5.0 Native Engine Active");
 
         const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {
             apiKey: "AIzaSyClININqtn0HoO3ovVj8nJPlWKn9N5Lx90",
@@ -58,183 +55,81 @@
             measurementId: "G-2N90ZMMJYC"
         };
 
-        try {
-            const app = firebase.initializeApp(firebaseConfig);
-            window.db = firebase.firestore(app);
-            window.auth = firebase.auth(app);
-            console.log("Firebase status: Connection successfully mounted to window.");
-            
-            window.onAuthStateChanged = (authInstance, callback) => authInstance.onAuthStateChanged(callback);
-            window.signInAnonymously = (authInstance) => authInstance.signInAnonymously();
-            window.signInWithCustomToken = (authInstance, token) => authInstance.signInWithCustomToken(token);
-            window.doc = (dbInstance, path) => dbInstance.doc(path);
-            window.onSnapshot = (reference, callback, errorCallback) => reference.onSnapshot(snapshot => {
-                callback({ exists: snapshot.exists, data: () => snapshot.data() });
-            }, errorCallback);
-            window.setDoc = (reference, payload, options) => reference.set(payload, options);
-            window.getDoc = (reference) => reference.get().then(snapshot => ({ exists: snapshot.exists, data: () => snapshot.data() }));
-        } catch(e) {
-            console.error("Firebase Initialization Failure:", e);
-        }
+        const app = firebase.initializeApp(firebaseConfig);
+        window.db = firebase.firestore(app);
+        window.auth = firebase.auth(app);
+        
+        window.onAuthStateChanged = (authInstance, callback) => authInstance.onAuthStateChanged(callback);
+        window.signInAnonymously = (authInstance) => authInstance.signInAnonymously();
+        window.signInWithCustomToken = (authInstance, token) => authInstance.signInWithCustomToken(token);
+        window.doc = (dbInstance, path) => dbInstance.doc(path);
+        window.onSnapshot = (reference, callback, errorCallback) => reference.onSnapshot(snapshot => {
+            callback({ exists: snapshot.exists, data: () => snapshot.data() });
+        }, errorCallback);
+        window.setDoc = (reference, payload, options) => reference.set(payload, options);
+        window.getDoc = (reference) => reference.get().then(snapshot => ({ exists: snapshot.exists, data: () => snapshot.data() }));
     </script>
     
-    <script type="text/babel">
-        console.log("Babel Compiler status: JSX Script block successfully read and evaluated by the browser.");
+    <script>
+        console.log("Native Runtime status: Executing standard browser build layout.");
         const { useState, useEffect, useRef } = React;
+        const e = React.createElement;
+
+        const PlusIcon = ({ className }) => 
+            e('svg', { xmlns: 'http://www.w3.org/2000/svg', className: className, viewBox: '0 0 24 24', fill: 'currentColor' },
+                e('path', { d: 'M19 11h-6V5h-2v6H5v2h6v6h2v-6h6z' })
+            );
+
+        const CloseIcon = ({ className }) => 
+            e('svg', { xmlns: 'http://www.w3.org/2000/svg', className: className, viewBox: '0 0 24 24', fill: 'currentColor' },
+                e('path', { d: 'M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z' })
+            );
+
+        const TrophyIcon = ({ className }) => 
+            e('svg', { xmlns: 'http://www.w3.org/2000/svg', className: className, viewBox: '0 0 24 24', fill: 'currentColor' },
+                e('path', { d: 'M12 2c-3.31 0-6 2.69-6 6v3H4a2 2 0 00-2 2v7a2 2 0 002 2h16a2 2 0 002-2v-7a2 2 0 00-2-2h-2V8c0-3.31-2.69-6-6-6zm-4 9h8V8c0-2.21-1.79-4-4-4s-4 1.79-4 4v3zm12 9H4v-7h16v7z' }),
+                e('path', { d: 'M10 14h4v4h-4z' })
+            );
+
+        const DiceIcon = ({ className }) => 
+            e('svg', { xmlns: 'http://www.w3.org/2000/svg', className: className, viewBox: '0 0 24 24', fill: 'currentColor' },
+                e('path', { d: 'M12 2c-5.52 0-10 4.48-10 10s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zM8 8.5c-.83 0-1.5-.67-1.5-1.5S7.17 5.5 8 5.5s1.5.67 1.5 1.5S8.83 8.5 8 8.5zm8 0c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5S16.83 8.5 16 8.5zm-4 4c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5S12.83 12.5 12 12.5zm-4 4c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5S8.83 16.5 8 16.5zm8 0c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5S16.83 16.5 16 16.5z' })
+            );
+
+        const ScoringGuide = ({ onClose }) => {
+            const row = (comb, pts) => e('tr', { className: 'border-b border-gray-700' },
+                e('td', { className: 'py-3 px-4 flex items-center' }, e('span', { className: 'text-2xl font-bold mr-2' }, comb.split(' ')[0]), comb.split(' ').slice(1).join(' ')),
+                e('td', { className: 'py-3 px-4 text-right font-bold text-lg' }, pts)
+            );
+            return e('div', { className: 'fixed inset-0 bg-gray-900 bg-opacity-95 flex flex-col items-center justify-center p-4 z-50 overflow-y-auto' },
+                e('div', { className: 'bg-gray-800 text-white rounded-lg shadow-xl p-6 md:p-10 max-w-2xl w-full' },
+                    e('div', { className: 'flex justify-between items-center mb-6' },
+                        e('h2', { className: 'text-3xl md:text-4xl font-bold text-yellow-400' }, 'Farkle Scoring'),
+                        e('button', { onClick: onClose, className: 'text-gray-400 hover:text-white transition-colors duration-200' }, e(CloseIcon, { className: 'w-8 h-8 md:w-10 md:h-10' }))
+                    ),
+                    e('div', { className: 'overflow-x-auto' },
+                        e('table', { className: 'w-full text-left border-collapse' },
+                            e('thead', null,
+                                e('tr', null,
+                                    e('th', { className: 'py-2 px-4 border-b-2 border-gray-600 text-gray-400 font-semibold text-sm md:text-base' }, 'Combination'),
+                                    e('th', { className: 'py-2 px-4 border-b-2 border-gray-600 text-gray-400 font-semibold text-sm md:text-base text-right' }, 'Points')
+                                )
+                            ),
+                            e('tbody', null,
+                                row('1 Single One', '100'), row('5 Single Five', '50'), row('3x1 Three of a Kind (Ones)', '1000'),
+                                row('3x2 Three of a Kind (Twos)', '200'), row('3x3 Three of a Kind (Threes)', '300'), row('3x4 Three of a Kind (Fours)', '400'),
+                                row('3x5 Three of a Kind (Fives)', '500'), row('3x6 Three of a Kind (Sixes)', '600'), row('4x Four of a Kind', '1000'),
+                                row('5x Five of a Kind', '2000'), row('6x Six of a Kind', '3000'), row('1-6 Straight (1,2,3,4,5,6)', '1500'),
+                                row('3x Pair Three Pairs', '1500'), row('4+2 Four of a kind + Pair', '2000'), row('2x3 Two sets of three of a kind', '2500')
+                            )
+                        )
+                    )
+                )
+            );
+        };
 
         const App = () => {
             const COLLECTION_NAME = 'farkle_games';
-
-            const PlusIcon = ({ className }) => (
-                <svg xmlns="http://www.w3.org/2000/svg" className={className} viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M19 11h-6V5h-2v6H5v2h6v6h2v-6h6z" />
-                </svg>
-            );
-
-            const CloseIcon = ({ className }) => (
-                <svg xmlns="http://www.w3.org/2000/svg" className={className} viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z" />
-                </svg>
-            );
-
-            const TrophyIcon = ({ className }) => (
-                <svg xmlns="http://www.w3.org/2000/svg" className={className} viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M12 2c-3.31 0-6 2.69-6 6v3H4a2 2 0 00-2 2v7a2 2 0 002 2h16a2 2 0 002-2v-7a2 2 0 00-2-2h-2V8c0-3.31-2.69-6-6-6zm-4 9h8V8c0-2.21-1.79-4-4-4s-4 1.79-4 4v3zm12 9H4v-7h16v7z" />
-                    <path d="M10 14h4v4h-4z" />
-                </svg>
-            );
-
-            const DiceIcon = ({ className }) => (
-                <svg xmlns="http://www.w3.org/2000/svg" className={className} viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M12 2c-5.52 0-10 4.48-10 10s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zM8 8.5c-.83 0-1.5-.67-1.5-1.5S7.17 5.5 8 5.5s1.5.67 1.5 1.5S8.83 8.5 8 8.5zm8 0c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5S16.83 8.5 16 8.5zm-4 4c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5S12.83 12.5 12 12.5zm-4 4c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5S8.83 16.5 8 16.5zm8 0c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5S16.83 16.5 16 16.5z" />
-                </svg>
-            );
-
-            const ScoringGuide = ({ onClose }) => (
-                <div className="fixed inset-0 bg-gray-900 bg-opacity-95 flex flex-col items-center justify-center p-4 z-50 overflow-y-auto">
-                    <div className="bg-gray-800 text-white rounded-lg shadow-xl p-6 md:p-10 max-w-2xl w-full">
-                        <div className="flex justify-between items-center mb-6">
-                            <h2 className="text-3xl md:text-4xl font-bold text-yellow-400">Farkle Scoring</h2>
-                            <button onClick={onClose} className="text-gray-400 hover:text-white transition-colors duration-200">
-                                <CloseIcon className="w-8 h-8 md:w-10 md:h-10" />
-                            </button>
-                        </div>
-                        <div className="overflow-x-auto">
-                            <table className="w-full text-left border-collapse">
-                                <thead>
-                                    <tr>
-                                        <th className="py-2 px-4 border-b-2 border-gray-600 text-gray-400 font-semibold text-sm md:text-base">Combination</th>
-                                        <th className="py-2 px-4 border-b-2 border-gray-600 text-gray-400 font-semibold text-sm md:text-base text-right">Points</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr className="border-b border-gray-700">
-                                        <td className="py-3 px-4 flex items-center">
-                                            <span className="text-2xl font-bold mr-2">1</span> Single One
-                                        </td>
-                                        <td className="py-3 px-4 text-right font-bold text-lg">100</td>
-                                    </tr>
-                                    <tr className="border-b border-gray-700">
-                                        <td className="py-3 px-4 flex items-center">
-                                            <span className="text-2xl font-bold mr-2">5</span> Single Five
-                                        </td>
-                                        <td className="py-3 px-4 text-right font-bold text-lg">50</td>
-                                    </tr>
-                                    <tr className="border-b border-gray-700">
-                                        <td className="py-3 px-4 flex items-center">
-                                            <span className="text-2xl font-bold mr-2">3x1</span> Three of a Kind (Ones)
-                                        </td>
-                                        <td className="py-3 px-4 text-right font-bold text-lg">1000</td>
-                                    </tr>
-                                    <tr className="border-b border-gray-700">
-                                        <td className="py-3 px-4 flex items-center">
-                                            <span className="text-2xl font-bold mr-2">3x2</span> Three of a Kind (Twos)
-                                        </td>
-                                        <td className="py-3 px-4 text-right font-bold text-lg">200</td>
-                                    </tr>
-                                    <tr className="border-b border-gray-700">
-                                        <td className="py-3 px-4 flex items-center">
-                                            <span className="text-2xl font-bold mr-2">3x3</span> Three of a Kind (Threes)
-                                        </td>
-                                        <td className="py-3 px-4 text-right font-bold text-lg">300</td>
-                                    </tr>
-                                    <tr className="border-b border-gray-700">
-                                        <td className="py-3 px-4 flex items-center">
-                                            <span className="text-2xl font-bold mr-2">3x4</span> Three of a Kind (Fours)
-                                        </td>
-                                        <td className="py-3 px-4 text-right font-bold text-lg">400</td>
-                                    </tr>
-                                    <tr className="border-b border-gray-700">
-                                        <td className="py-3 px-4 flex items-center">
-                                            <span className="text-2xl font-bold mr-2">3x5</span> Three of a Kind (Fives)
-                                        </td>
-                                        <td className="py-3 px-4 text-right font-bold text-lg">500</td>
-                                    </tr>
-                                    <tr className="border-b border-gray-700">
-                                        <td className="py-3 px-4 flex items-center">
-                                            <span className="text-2xl font-bold mr-2">3x6</span> Three of a Kind (Sixes)
-                                        </td>
-                                        <td className="py-3 px-4 text-right font-bold text-lg">600</td>
-                                    </tr>
-                                    <tr className="border-b border-gray-700">
-                                        <td className="py-3 px-4 flex items-center">
-                                            <span className="text-2xl font-bold mr-2">4x</span> Four of a Kind
-                                        </td>
-                                        <td className="py-3 px-4 text-right font-bold text-lg">1000</td>
-                                    </tr>
-                                    <tr className="border-b border-gray-700">
-                                        <td className="py-3 px-4 flex items-center">
-                                            <span className="text-2xl font-bold mr-2">5x</span> Five of a Kind
-                                        </td>
-                                        <td className="py-3 px-4 text-right font-bold text-lg">2000</td>
-                                    </tr>
-                                    <tr className="border-b border-gray-700">
-                                        <td className="py-3 px-4 flex items-center">
-                                            <span className="text-2xl font-bold mr-2">6x</span> Six of a Kind
-                                        </td>
-                                        <td className="py-3 px-4 text-right font-bold text-lg">3000</td>
-                                    </tr>
-                                    <tr className="border-b border-gray-700">
-                                        <td className="py-3 px-4 flex items-center">
-                                            <span className="text-2xl font-bold mr-2">1-6</span> Straight (1,2,3,4,5,6)
-                                        </td>
-                                        <td className="py-3 px-4 text-right font-bold text-lg">1500</td>
-                                    </tr>
-                                    <tr className="border-b border-gray-700">
-                                        <td className="py-3 px-4 flex items-center">
-                                            <span className="text-2xl font-bold mr-2">3x Pair</span> Three Pairs (e.g., 2,2, 4,4, 6,6)
-                                        </td>
-                                        <td className="py-3 px-4 text-right font-bold text-lg">1500</td>
-                                    </tr>
-                                    <tr className="border-b border-gray-700">
-                                        <td className="py-3 px-4 flex items-center">
-                                            <span className="text-2xl font-bold mr-2">4+2</span> Four of a kind + Pair
-                                        </td>
-                                        <td className="py-3 px-4 text-right font-bold text-lg">2000</td>
-                                    </tr>
-                                    <tr className="border-b border-gray-700">
-                                        <td className="py-3 px-4 flex items-center">
-                                            <span className="text-2xl font-bold mr-2">2x3</span> Two sets of three of a kind
-                                        </td>
-                                        <td className="py-3 px-4 text-right font-bold text-lg">2500</td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-            );
-            
-            const generateGameId = () => {
-                const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-                let result = '';
-                const length = 5;
-                for (let i = 0; i < length; i++) {
-                    result += characters.charAt(Math.floor(Math.random() * characters.length));
-                }
-                return result;
-            };
-
             const [players, setPlayers] = useState([]);
             const [isAuthReady, setIsAuthReady] = useState(false);
             const [userId, setUserId] = useState(null);
@@ -260,42 +155,25 @@
             };
 
             const handleConfirmDecision = (decision) => {
-                if (decision && confirmAction) {
-                    confirmAction();
-                }
+                if (decision && confirmAction) confirmAction();
                 setShowConfirm(false);
                 setConfirmAction(null);
             };
 
             const setupGameListener = (id) => {
-                if (!window.db) {
-                    setError('Firestore not initialized.');
-                    return;
-                }
-
-                if (unsubscribeFirestoreRef.current) {
-                    unsubscribeFirestoreRef.current();
-                }
-
+                if (!window.db) return;
+                if (unsubscribeFirestoreRef.current) unsubscribeFirestoreRef.current();
                 setIsGameLoading(true);
                 const docRef = window.doc(window.db, `${COLLECTION_NAME}/${id}`);
-                
                 unsubscribeFirestoreRef.current = window.onSnapshot(docRef, (docSnap) => {
-                    try {
-                        if (docSnap.exists()) {
-                            const data = docSnap.data();
-                            const fetchedPlayers = data.players || [];
-                            const sortedPlayers = fetchedPlayers.sort((a, b) => b.score - a.score);
-                            setPlayers(sortedPlayers);
-                        } else {
-                            setPlayers([]);
-                            setError(`Game '${id}' does not exist.`);
-                        }
-                    } catch (e) {
-                        setError('Failed to fetch data: ' + e.message);
-                    } finally {
-                        setIsGameLoading(false);
+                    if (docSnap.exists) {
+                        const fetchedPlayers = docSnap.data().players || [];
+                        setPlayers(fetchedPlayers.sort((a, b) => b.score - a.score));
+                    } else {
+                        setPlayers([]);
+                        setError(`Game '${id}' does not exist.`);
                     }
+                    setIsGameLoading(false);
                 }, (e) => {
                     setError('Real-time updates failed: ' + e.message);
                     setIsGameLoading(false);
@@ -303,249 +181,190 @@
             };
 
             const handleCreateGame = async () => {
-                const newGameId = generateGameId();
+                const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+                let newGameId = '';
+                for (let i = 0; i < 5; i++) newGameId += characters.charAt(Math.floor(Math.random() * characters.length));
                 const docRef = window.doc(window.db, `${COLLECTION_NAME}/${newGameId}`);
-                
                 try {
                     const docSnap = await window.getDoc(docRef);
-                    if (docSnap.exists()) {
-                        handleCreateGame();
-                        return;
-                    }
-                    
+                    if (docSnap.exists) { handleCreateGame(); return; }
                     await window.setDoc(docRef, { players: [] });
                     setGameId(newGameId);
                     setError(null);
                     setupGameListener(newGameId);
-                } catch (e) {
-                    setError('Failed to create game: ' + e.message);
-                }
+                } catch (e) { setError('Failed to create game: ' + e.message); }
             };
 
             const handleJoinGame = async () => {
                 const joinGameId = gameIdInputRef.current.value.trim().toUpperCase();
-                if (!joinGameId) {
-                    setError('Game ID cannot be empty.');
-                    return;
-                }
-                if (joinGameId.length !== 5) {
-                    setError('Game ID must be 5 characters.');
-                    return;
-                }
-
+                if (!joinGameId || joinGameId.length !== 5) { setError('Game ID must be 5 characters.'); return; }
                 const docRef = window.doc(window.db, `${COLLECTION_NAME}/${joinGameId}`);
                 const docSnap = await window.getDoc(docRef);
-
-                if (!docSnap.exists()) {
-                    setError(`No game found with ID: '${joinGameId}'.`);
-                    return;
-                }
-
+                if (!docSnap.exists) { setError(`No game found with ID: '${joinGameId}'.`); return; }
                 setGameId(joinGameId);
                 setError(null);
                 setupGameListener(joinGameId);
             };
 
             useEffect(() => {
-                console.log("React Lifecycle: App Component mounted successfully.");
-                if (!window.auth || !window.db) {
-                    console.warn("React Warning: Window architecture missing backend bindings. Bypassing state locks.");
-                    setIsAuthReady(true);
-                    setLoading(false);
-                    return;
-                }
-                
-                let unsubscribeAuth = () => {};
-
-                const signIn = async () => {
-                    try {
-                        const token = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
-                        if (token) {
-                            await window.signInWithCustomToken(window.auth, token);
-                        } else {
-                            await window.signInAnonymously(window.auth);
-                        }
-                        console.log("Firebase Status: Anonymous baseline user session established.");
-                    } catch (e) {
-                        console.error("Sign-in process failed:", e);
-                        setError('Sign-in failed: ' + e.message);
-                        setLoading(false);
-                    }
-                };
-                
-                unsubscribeAuth = window.onAuthStateChanged(window.auth, (user) => {
+                let unsubscribeAuth = window.onAuthStateChanged(window.auth, (user) => {
                     setUserId(user ? user.uid : null);
                     setIsAuthReady(true);
                     setLoading(false);
-                    console.log("React Lifecycle: Global state unlocked. Auth Ready.");
                 });
-
-                signIn();
-
-                return () => {
-                    unsubscribeAuth();
-                    if (unsubscribeFirestoreRef.current) {
-                        unsubscribeFirestoreRef.current();
-                    }
-                };
+                window.signInAnonymously(window.auth).catch(() => {
+                    setIsAuthReady(true);
+                    setLoading(false);
+                });
+                return () => { unsubscribeAuth(); if (unsubscribeFirestoreRef.current) unsubscribeFirestoreRef.current(); };
             }, []);
 
+            const handleAddPlayer = async () => {
+                const newPlayerName = nameInputRef.current.value.trim();
+                if (!newPlayerName || !gameId) return;
+                try {
+                    const docRef = window.doc(window.db, `${COLLECTION_NAME}/${gameId}`);
+                    await window.setDoc(docRef, { players: [...players, { name: newPlayerName, score: 0, id: crypto.randomUUID() }] }, { merge: true });
+                    nameInputRef.current.value = '';
+                } catch (e) { setError('Failed to add player: ' + e.message); }
+            };
+
+            const handleUpdateScore = async (playerIndex) => {
+                const inputElement = scoreInputRefs.current[playerIndex];
+                const scoreToAdd = parseInt(inputElement.value, 10);
+                if (isNaN(scoreToAdd) || scoreToAdd <= 0 || !gameId) return;
+                try {
+                    const docRef = window.doc(window.db, `${COLLECTION_NAME}/${gameId}`);
+                    const updated = players.map((p, idx) => idx === playerIndex ? { ...p, score: p.score + scoreToAdd } : p);
+                    await window.setDoc(docRef, { players: updated }, { merge: true });
+                    inputElement.value = '';
+                } catch (e) { setError('Failed to update score: ' + e.message); }
+            };
+
+            const handleResetScores = async () => {
+                if (!gameId) return;
+                try {
+                    await window.setDoc(window.doc(window.db, `${COLLECTION_NAME}/${gameId}`), { players: players.map(p => ({ ...p, score: 0 })) });
+                    setShowConfirm(false);
+                } catch (e) { setError('Failed to reset: ' + e.message); }
+            };
+
+            const handleDeletePlayer = async (playerIndex) => {
+                if (!gameId) return;
+                try {
+                    await window.setDoc(window.doc(window.db, `${COLLECTION_NAME}/${gameId}`), { players: players.filter((_, idx) => idx !== playerIndex) });
+                    setShowConfirm(false);
+                } catch (e) { setError('Failed to delete: ' + e.message); }
+            };
+
             if (loading || !isAuthReady) {
-                return (
-                    <div className="flex items-center justify-center min-h-screen bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-gray-200">
-                        <div className="flex flex-col items-center">
-                            <DiceIcon className="text-6xl animate-spin text-indigo-500" />
-                            <p className="mt-4 text-xl font-semibold">Bypassing authorization protocols...</p>
-                        </div>
-                    </div>
+                return window.auth && window.db ? 
+                    e('div', { className: 'flex items-center justify-center min-h-screen text-gray-200' }, 
+                        e('div', { className: 'flex flex-col items-center' }, e(DiceIcon, { className: 'text-6xl animate-spin text-indigo-500' }), e('p', { className: 'mt-4 text-xl font-semibold' }, 'Connecting...'))
+                    ) : null;
+            }
+
+            if (error) return e('div', { className: 'flex items-center justify-center min-h-screen bg-red-100 text-red-800 p-4' }, e('p', null, error));
+
+            const ConfirmationModal = () => e('div', { className: 'fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center z-50' },
+                e('div', { className: 'bg-gray-800 p-6 rounded-lg shadow-xl max-w-sm mx-auto text-white' },
+                    e('p', { className: 'text-lg font-semibold mb-4' }, confirmMessage),
+                    e('div', { className: 'flex justify-end space-x-4' },
+                        e('button', { onClick: () => handleConfirmDecision(false), className: 'px-4 py-2 rounded-lg text-gray-300 hover:bg-gray-700' }, 'Cancel'),
+                        e('button', { onClick: () => handleConfirmDecision(true), className: 'px-4 py-2 rounded-lg bg-red-500 text-white hover:bg-red-600' }, 'Confirm')
+                    )
+                )
+            );
+
+            if (!gameId) {
+                return e('div', { className: 'flex flex-col items-center justify-center min-h-screen p-4 text-white' },
+                    e('h1', { className: 'text-3xl font-bold mb-6' }, 'Start a New Game'),
+                    e('div', { className: 'w-full max-w-sm' },
+                        e('button', { onClick: handleCreateGame, className: 'w-full mb-4 bg-green-500 hover:bg-green-600 font-bold py-3 px-6 rounded-lg shadow-lg' }, 'Create New Game'),
+                        e('div', { className: 'flex items-center space-x-2 my-4' }, e('hr', { className: 'flex-grow border-gray-600' }), e('span', { className: 'text-gray-400' }, 'or'), e('hr', { className: 'flex-grow border-gray-600' })),
+                        e('div', { className: 'mb-4' }, e('input', { ref: gameIdInputRef, type: 'text', placeholder: 'Enter Game ID', className: 'w-full p-3 rounded-lg bg-gray-800 border border-gray-700 text-center text-white focus:outline-none focus:ring-2 focus:ring-indigo-500', onKeyDown: (e) => e.key === 'Enter' && handleJoinGame() })),
+                        e('button', { onClick: handleJoinGame, className: 'w-full bg-indigo-500 hover:bg-indigo-600 font-bold py-3 px-6 rounded-lg shadow-lg' }, 'Join Game')
+                    )
                 );
             }
 
-            if (error) {
-                return (
-                    <div className="flex items-center justify-center min-h-screen bg-red-100 text-red-800 p-4 rounded-lg">
-                        <p>An error occurred: {error}</p>
-                    </div>
+            if (currentView === 'scorer') {
+                return e('div', { className: 'flex flex-col min-h-screen text-white p-4 sm:p-6' },
+                    e('div', { className: 'flex justify-between items-center mb-6' },
+                        e('h1', { className: 'text-3xl font-bold' }, 'Score Entry'),
+                        e('div', { className: 'flex space-x-2' },
+                            e('button', { onClick: () => setCurrentView('display'), className: 'bg-indigo-600 font-bold py-2 px-4 rounded-full flex items-center' }, e(TrophyIcon, { className: 'mr-2 h-5 w-5' }), 'Display View'),
+                            e('button', { onClick: () => setShowScoringGuide(true), className: 'bg-gray-600 font-bold py-2 px-4 rounded-full' }, 'Scoring')
+                        )
+                    ),
+                    e('div', { className: 'flex items-center justify-between mb-4 bg-gray-800 p-3 rounded-lg' },
+                        e('p', { className: 'font-semibold' }, 'Game ID: ', e('span', { className: 'text-indigo-400 font-bold' }, gameId)),
+                        e('button', { onClick: () => setGameId(''), className: 'text-red-400 font-semibold text-sm' }, 'Leave Game')
+                    ),
+                    e('div', { className: 'mb-6' },
+                        e('h2', { className: 'text-xl font-semibold mb-2' }, 'Add Player'),
+                        e('div', { className: 'flex space-x-2' },
+                            e('input', { ref: nameInputRef, type: 'text', placeholder: 'Enter player name', className: 'flex-grow p-3 rounded-lg bg-gray-800 border border-gray-700 text-white focus:outline-none focus:ring-2 focus:ring-indigo-500', onKeyDown: (e) => e.key === 'Enter' && handleAddPlayer() }),
+                            e('button', { onClick: handleAddPlayer, className: 'bg-green-500 p-3 rounded-lg' }, e(PlusIcon, { className: 'h-6 w-6' }))
+                        )
+                    ),
+                    e('div', { className: 'flex-grow overflow-y-auto' },
+                        isGameLoading ? e('div', { className: 'text-center p-4' }, 'Loading players...') :
+                        players.length === 0 ? e('p', { className: 'text-center text-gray-500' }, 'No players added yet.') :
+                        players.map((p, idx) => e('div', { key: p.id, className: 'bg-gray-800 p-4 rounded-lg mb-4 flex items-center justify-between' },
+                            e('div', null, e('p', { className: 'text-xl font-semibold' }, p.name), e('p', { className: 'text-gray-400' }, 'Score: ', p.score)),
+                            e('div', { className: 'flex items-center space-x-2' },
+                                e('input', { ref: el => scoreInputRefs.current[idx] = el, type: 'text', inputMode: 'numeric', pattern: '[0-9]*', placeholder: 'Points', className: 'w-20 p-2 rounded-lg bg-gray-700 border border-gray-600 text-center text-white', onKeyDown: (e) => e.key === 'Enter' && handleUpdateScore(idx) }),
+                                e('button', { onClick: () => handleUpdateScore(idx), className: 'bg-indigo-500 p-2 rounded-lg' }, e(PlusIcon, { className: 'h-5 w-5' })),
+                                e('button', { onClick: () => handleConfirm(() => handleDeletePlayer(idx), 'Remove this player?'), className: 'bg-red-500 p-2 rounded-lg' }, e(CloseIcon, { className: 'h-5 w-5' }))
+                            )
+                        ))
+                    ),
+                    e('div', { className: 'mt-6 flex justify-center space-x-4' },
+                        e('button', { onClick: () => handleConfirm(handleResetScores, 'Reset all player scores to 0?'), className: 'bg-red-500 font-bold py-3 px-6 rounded-lg shadow-lg' }, 'Reset Scores'),
+                        e('button', { onClick: () => setCurrentView('display'), className: 'bg-gray-600 font-bold py-3 px-6 rounded-lg shadow-lg' }, 'View Scoreboard')
+                    ),
+                    showConfirm && e(ConfirmationModal),
+                    showScoringGuide && e(ScoringGuide, { onClose: () => setShowScoringGuide(false) })
                 );
             }
 
-            const ConfirmationModal = ({ message, onConfirm, onCancel }) => (
-                <div className="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center z-50">
-                    <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-xl max-w-sm mx-auto">
-                        <p className="text-lg font-semibold text-gray-800 dark:text-white mb-4">{message}</p>
-                        <div className="flex justify-end space-x-4">
-                            <button onClick={onCancel} className="px-4 py-2 rounded-lg text-gray-700 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-700">Cancel</button>
-                            <button onClick={onConfirm} className="px-4 py-2 rounded-lg bg-red-500 text-white hover:bg-red-600">Confirm</button>
-                        </div>
-                    </div>
-                </div>
-            );
+            const winningScore = players.reduce((max, p) => Math.max(max, p.score), 0);
+            const hasWinner = winningScore >= 10000;
 
-            const GameLobby = ({ onJoin, onCreate }) => (
-                <div className="flex flex-col items-center justify-center h-full p-4 sm:p-6 bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-gray-200">
-                    <h1 className="text-3xl font-bold mb-6">Start a New Game</h1>
-                    <div className="w-full max-w-sm">
-                        <button onClick={onCreate} className="w-full mb-4 bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-6 rounded-lg shadow-lg transition duration-300 ease-in-out transform hover:scale-105">Create New Game</button>
-                        <div className="flex items-center space-x-2 my-4">
-                            <hr className="flex-grow border-gray-300 dark:border-gray-600" /><span className="text-gray-500 dark:text-gray-400">or</span><hr className="flex-grow border-gray-300 dark:border-gray-600" />
-                        </div>
-                        <div className="mb-4">
-                            <input ref={gameIdInputRef} type="text" placeholder="Enter Game ID" className="w-full p-3 rounded-lg border-2 border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-center" onKeyDown={(e) => e.key === 'Enter' && onJoin()} />
-                        </div>
-                        <div className="flex">
-                            <button onClick={onJoin} className="w-full bg-indigo-500 hover:bg-indigo-600 text-white font-bold py-3 px-6 rounded-lg shadow-lg transition duration-300 ease-in-out transform hover:scale-105">Join Game</button>
-                        </div>
-                        {error && <p className="text-red-500 text-sm mt-2 text-center">{error}</p>}
-                    </div>
-                </div>
-            );
-
-            const ScorerView = () => {
-                if (!gameId) return <GameLobby onJoin={handleJoinGame} onCreate={handleCreateGame} />;
-                return (
-                    <div className="flex flex-col h-full bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-gray-200 p-4 sm:p-6">
-                        <div className="flex justify-between items-center mb-6">
-                            <h1 className="text-3xl font-bold">Score Entry</h1>
-                            <div className="flex space-x-2">
-                                <button onClick={() => setCurrentView('display')} className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded-full shadow-lg transition duration-300 ease-in-out transform hover:scale-105"><TrophyIcon className="inline-block mr-2 h-5 w-5" /> Display View</button>
-                                <button onClick={() => setShowScoringGuide(true)} className="bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded-full shadow-lg transition duration-300 ease-in-out transform hover:scale-105">Scoring</button>
-                            </div>
-                        </div>
-                        <div className="flex items-center justify-between mb-4 bg-gray-200 dark:bg-gray-800 p-3 rounded-lg">
-                            <p className="font-semibold text-lg">Game ID: <span className="font-bold text-indigo-500">{gameId}</span></p>
-                            <button onClick={handleLeaveGame} className="text-red-500 hover:text-red-700 text-sm font-semibold">Leave Game</button>
-                        </div>
-                        <div className="mb-6">
-                            <h2 className="text-2xl font-semibold mb-2">Add Player</h2>
-                            <div className="flex space-x-2">
-                                <input ref={nameInputRef} type="text" placeholder="Enter player name" className="flex-grow p-3 rounded-lg border-2 border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-indigo-500" onKeyDown={(e) => e.key === 'Enter' && handleAddPlayer()} />
-                                <button onClick={handleAddPlayer} className="bg-green-500 hover:bg-green-600 text-white p-3 rounded-lg shadow-md transition duration-300 ease-in-out transform hover:scale-105"><PlusIcon className="h-6 w-6" /></button>
-                            </div>
-                        </div>
-                        <div className="flex-grow overflow-y-auto">
-                            {players.length === 0 ? (
-                                <p className="text-center text-gray-400 text-2xl font-semibold">No players added yet.</p>
-                            ) : (
-                                players.map((player, index) => (
-                                    <div key={player.id} className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-md mb-4 flex items-center justify-between">
-                                        <div className="flex-grow">
-                                            <p className="text-xl font-semibold">{player.name}</p>
-                                            <p className="text-lg text-gray-500 dark:text-gray-400">Score: {player.score}</p>
-                                        </div>
-                                        <div className="flex items-center space-x-2">
-                                            <input ref={el => scoreInputRefs.current[index] = el} type="text" inputMode="numeric" pattern="[0-9]*" maxLength="6" placeholder="Points" className="w-24 p-2 rounded-lg border-2 border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-700 text-center focus:outline-none focus:ring-2 focus:ring-indigo-500" onKeyDown={(e) => e.key === 'Enter' && handleUpdateScore(index)} />
-                                            <button onClick={() => handleUpdateScore(index)} className="bg-indigo-500 hover:bg-indigo-600 text-white p-3 rounded-lg shadow-md transition duration-300 ease-in-out transform hover:scale-105"><PlusIcon className="h-6 w-6" /></button>
-                                            <button onClick={() => handleConfirm(() => handleDeletePlayer(index), 'Are you sure you want to remove this player?')} className="bg-red-500 hover:bg-red-600 text-white p-2 rounded-lg shadow-md transition duration-300 ease-in-out transform hover:scale-105"><CloseIcon className="h-5 w-5" /></button>
-                                        </div>
-                                    </div>
-                                ))
-                            )}
-                        </div>
-                        <div className="mt-6 flex flex-col sm:flex-row justify-center space-y-4 sm:space-y-0 sm:space-x-4">
-                            <button onClick={() => handleConfirm(handleResetScores, 'Are you sure you want to reset all scores?')} className="bg-red-500 hover:bg-red-600 text-white font-bold py-3 px-6 rounded-lg shadow-lg transition duration-300 ease-in-out transform hover:scale-105">Reset Scores</button>
-                            <button onClick={() => setCurrentView('display')} className="bg-gray-500 hover:bg-gray-600 text-white font-bold py-3 px-6 rounded-lg shadow-lg transition duration-300 ease-in-out transform hover:scale-105">View Scoreboard</button>
-                        </div>
-                    </div>
-                );
-            };
-
-            const DisplayView = () => {
-                if (!gameId) return <GameLobby onJoin={handleJoinGame} onCreate={handleCreateGame} />;
-                const winningScore = players.reduce((max, player) => Math.max(max, player.score), 0);
-                const hasWinner = winningScore >= 10000;
-                return (
-                    <div className="flex flex-col h-full bg-gray-900 text-white font-sans p-6 md:p-12">
-                        <div className="flex justify-between items-center mb-8">
-                            <h1 className="text-4xl md:text-6xl font-extrabold tracking-tight">Farkle Scoreboard</h1>
-                            <div className="flex space-x-2">
-                                <button onClick={() => setCurrentView('scorer')} className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-6 rounded-full shadow-lg transition duration-300 ease-in-out transform hover:scale-105"><DiceIcon className="inline-block mr-2 h-5 w-5" /> Enter Scores</button>
-                                <button onClick={() => setShowScoringGuide(true)} className="bg-gray-500 hover:bg-gray-600 text-white font-bold py-3 px-6 rounded-full shadow-lg transition duration-300 ease-in-out transform hover:scale-105">Scoring</button>
-                            </div>
-                        </div>
-                        <div className="flex items-center justify-between mb-4">
-                            <p className="font-semibold text-xl md:text-2xl">Game ID: <span className="font-bold text-yellow-400">{gameId}</span></p>
-                            <button onClick={handleLeaveGame} className="text-red-500 hover:text-red-700 text-sm font-semibold">Leave Game</button>
-                        </div>
-                        <div className="flex-grow grid grid-cols-1 gap-6 overflow-y-auto">
-                            {players.length === 0 ? (
-                                <p className="md:col-span-3 text-center text-gray-400 text-2xl font-semibold">No players added yet.</p>
-                            ) : (
-                                players.map((player) => {
-                                    const scoreColor = hasWinner && player.score === winningScore ? 'text-gold-400' : 'text-white';
-                                    const scoreFontWeight = hasWinner && player.score === winningScore ? 'font-extrabold' : 'font-bold';
-                                    const scoreDifference = player.score - winningScore;
-                                    return (
-                                        <div key={player.id} className="bg-gray-800 rounded-xl shadow-lg p-6 flex flex-col items-center text-center transition-all duration-300 transform hover:scale-105">
-                                            <p className="text-2xl md:text-3xl font-semibold text-gray-300 truncate w-full mb-1">{player.name}</p>
-                                            <p className={`text-5xl md:text-6xl ${scoreFontWeight} ${scoreColor} mb-2`}>{player.score}</p>
-                                            {hasWinner && (
-                                                <div className="mt-2 flex flex-col items-center">
-                                                    {player.score === winningScore && <TrophyIcon className="text-gold-400 h-10 w-10 mb-2 animate-bounce" />}
-                                                    <p className="text-red-400 text-xl font-bold">{scoreDifference}</p>
-                                                </div>
-                                            )}
-                                        </div>
-                                    );
-                                })
-                            )}
-                        </div>
-                    </div>
-                );
-            };
-
-            return (
-                <div className="min-h-screen flex flex-col bg-gray-100 dark:bg-gray-900">
-                    {showConfirm && <ConfirmationModal message={confirmMessage} onConfirm={() => handleConfirmDecision(true)} onCancel={() => handleConfirmDecision(false)} />}
-                    {showScoringGuide && <ScoringGuide onClose={() => setShowScoringGuide(false)} />}
-                    {currentView === 'scorer' && <ScorerView />}
-                    {currentView === 'display' && <DisplayView />}
-                </div>
+            return e('div', { className: 'flex flex-col min-h-screen bg-gray-900 text-white p-6 md:p-12' },
+                e('div', { className: 'flex justify-between items-center mb-8' },
+                    e('h1', { className: 'text-4xl md:text-6xl font-extrabold' }, 'Farkle Scoreboard'),
+                    e('div', { className: 'flex space-x-2' },
+                        e('button', { onClick: () => setCurrentView('scorer'), className: 'bg-indigo-600 font-bold py-3 px-6 rounded-full flex items-center' }, e(DiceIcon, { className: 'mr-2 h-5 w-5' }), 'Enter Scores'),
+                        e('button', { onClick: () => setShowScoringGuide(true), className: 'bg-gray-500 font-bold py-3 px-6 rounded-full' }, 'Scoring')
+                    )
+                ),
+                e('div', { className: 'flex items-center justify-between mb-6 bg-gray-800 p-3 rounded-lg' },
+                    e('p', { className: 'font-semibold text-lg' }, 'Game ID: ', e('span', { className: 'text-yellow-400 font-bold' }, gameId)),
+                    e('button', { onClick: () => setGameId(''), className: 'text-red-400 font-semibold text-sm' }, 'Leave Game')
+                ),
+                e('div', { className: 'flex-grow grid grid-cols-1 md:grid-cols-2 gap-6 overflow-y-auto' },
+                    isGameLoading ? e('div', { className: 'col-span-full text-center' }, 'Loading scoreboard...') :
+                    players.length === 0 ? e('p', { className: 'col-span-full text-center text-gray-500' }, 'No players added yet.') :
+                    players.map((p) => {
+                        const isLeader = hasWinner && p.score === winningScore;
+                        return e('div', { key: p.id, className: 'bg-gray-800 rounded-xl p-6 flex flex-col items-center text-center border ' + (isLeader ? 'border-yellow-500 shadow-yellow-500/20 shadow-lg' : 'border-gray-700') },
+                            e('p', { className: 'text-2xl font-semibold text-gray-300 truncate w-full' }, p.name),
+                            e('p', { className: 'text-5xl md:text-6xl font-black mt-2 ' + (isLeader ? 'text-yellow-400' : 'text-white') }, p.score),
+                            hasWinner && e('div', { className: 'mt-2 flex flex-col items-center' },
+                                isLeader ? e(TrophyIcon, { className: 'text-yellow-400 h-10 w-10 animate-bounce' }) :
+                                e('p', { className: 'text-red-400 text-xl font-bold' }, p.score - winningScore)
+                            )
+                        );
+                    })
+                ),
+                showScoringGuide && e(ScoringGuide, { onClose: () => setShowScoringGuide(false) })
             );
         };
 
         const root = ReactDOM.createRoot(document.getElementById('root'));
-        root.render(React.createElement(App));
-        console.log("--- ENGINE DIAGNOSTIC END ---");
+        root.render(e(App));
     </script>
 </body>
 </html>
