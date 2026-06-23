@@ -200,7 +200,7 @@
                         players: [], 
                         location: loc,
                         status: 'active',
-                        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                        createdAt: Date.now()
                     });
                     setGameId(newGameId);
                     setGameLocation(loc);
@@ -234,7 +234,7 @@
                     const docRef = window.db.collection(COLLECTION_NAME).doc(gameId);
                     await docRef.update({ 
                         status: 'finished', 
-                        finishedAt: firebase.firestore.FieldValue.serverTimestamp() 
+                        finishedAt: Date.now()
                     });
                     handleLeaveGame();
                     await fetchHistory();
@@ -252,8 +252,8 @@
                     const games = querySnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
                     
                     games.sort((a, b) => {
-                        const timeA = a.finishedAt?.seconds || 0;
-                        const timeB = b.finishedAt?.seconds || 0;
+                        const timeA = a.finishedAt || 0;
+                        const timeB = b.finishedAt || 0;
                         return timeB - timeA;
                     });
                     
@@ -455,7 +455,6 @@
                             <span className="flex items-center"><MapIcon className="w-4 h-4 text-red-400 mr-1"/>{gameLocation}</span>
                         </div>
 
-                        {/* FORCED SINGLE VERTICAL COLUMN GRID */}
                         <div className="flex-grow grid grid-cols-1 gap-4 overflow-y-auto">
                             {players.map((player) => {
                                 const isLeader = hasWinner && player.score === winningScore;
