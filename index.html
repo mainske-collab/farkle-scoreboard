@@ -40,11 +40,13 @@
     
     <script src="https://unpkg.com/@babel/standalone@7.23.11/babel.min.js"></script>
 
-    <script type="module" data-no-babel="true">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, doc, onSnapshot, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-        
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+
+    <script>
+        console.log("Farkle Scoreboard: Version 1.1.0 Tracking Verified");
+
         const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {
             apiKey: "AIzaSyClININqtn0HoO3ovVj8nJPlWKn9N5Lx90",
             authDomain: "farkle-scoreboard-afe9e.firebaseapp.com",
@@ -55,16 +57,21 @@
             measurementId: "G-2N90ZMMJYC"
         };
 
-        const app = initializeApp(firebaseConfig);
-        window.db = getFirestore(app);
-        window.auth = getAuth(app);
-        window.onAuthStateChanged = onAuthStateChanged;
-        window.signInAnonymously = signInAnonymously;
-        window.signInWithCustomToken = signInWithCustomToken;
-        window.doc = doc;
-        window.onSnapshot = onSnapshot;
-        window.setDoc = setDoc;
-        window.getDoc = getDoc;
+        // Initialize and bind globally for your React App to pick up instantly
+        if (!firebase.apps.length) {
+            const app = firebase.initializeApp(firebaseConfig);
+            window.db = firebase.firestore(app);
+            window.auth = firebase.auth(app);
+            
+            // Map legacy aliases straight to compat engine properties
+            window.onAuthStateChanged = (auth, cb) => auth.onAuthStateChanged(cb);
+            window.signInAnonymously = (auth) => auth.signInAnonymously();
+            window.signInWithCustomToken = (auth, token) => auth.signInWithCustomToken(token);
+            window.doc = (db, path) => db.doc(path);
+            window.onSnapshot = (ref, cb, errCb) => ref.onSnapshot(doc => cb({ exists: () => doc.exists, data: () => doc.data() }), errCb);
+            window.setDoc = (ref, data, opts) => ref.set(data, opts);
+            window.getDoc = (ref) => ref.get().then(doc => ({ exists: () => doc.exists, data: () => doc.data() }));
+        }
     </script>
     
     <script type="text/babel">
@@ -487,12 +494,8 @@
                     <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-xl max-w-sm mx-auto">
                         <p className="text-lg font-semibold text-gray-800 dark:text-white mb-4">{message}</p>
                         <div className="flex justify-end space-x-4">
-                            <button onClick={onCancel} className="px-4 py-2 rounded-lg text-gray-700 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-700">
-                                Cancel
-                            </button>
-                            <button onClick={onConfirm} className="px-4 py-2 rounded-lg bg-red-500 text-white hover:bg-red-600">
-                                Confirm
-                            </button>
+                            <button onClick={onCancel} className="px-4 py-2 rounded-lg text-gray-700 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-700">Cancel</button>
+                            <button onClick={onConfirm} className="px-4 py-2 rounded-lg bg-red-500 text-white hover:bg-red-600">Confirm</button>
                         </div>
                     </div>
                 </div>
@@ -502,38 +505,15 @@
                 <div className="flex flex-col items-center justify-center h-full p-4 sm:p-6 bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-gray-200">
                     <h1 className="text-3xl font-bold mb-6">Start a New Game</h1>
                     <div className="w-full max-w-sm">
-                        <button
-                            onClick={onCreate}
-                            className="w-full mb-4 bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-6 rounded-lg shadow-lg transition duration-300 ease-in-out transform hover:scale-105"
-                        >
-                            Create New Game
-                        </button>
+                        <button onClick={onCreate} className="w-full mb-4 bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-6 rounded-lg shadow-lg transition duration-300 ease-in-out transform hover:scale-105">Create New Game</button>
                         <div className="flex items-center space-x-2 my-4">
-                            <hr className="flex-grow border-gray-300 dark:border-gray-600" />
-                            <span className="text-gray-500 dark:text-gray-400">or</span>
-                            <hr className="flex-grow border-gray-300 dark:border-gray-600" />
+                            <hr className="flex-grow border-gray-300 dark:border-gray-600" /><span className="text-gray-500 dark:text-gray-400">or</span><hr className="flex-grow border-gray-300 dark:border-gray-600" />
                         </div>
                         <div className="mb-4">
-                            <input
-                                ref={gameIdInputRef}
-                                type="text"
-                                placeholder="Enter Game ID"
-                                className="w-full p-3 rounded-lg border-2 border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-center"
-                                onKeyDown={(e) => {
-                                    if (e.key === 'Enter') {
-                                        e.preventDefault();
-                                        onJoin();
-                                    }
-                                }}
-                            />
+                            <input ref={gameIdInputRef} type="text" placeholder="Enter Game ID" className="w-full p-3 rounded-lg border-2 border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-center" onKeyDown={(e) => e.key === 'Enter' && onJoin()} />
                         </div>
                         <div className="flex">
-                            <button
-                                onClick={onJoin}
-                                className="flex-1 bg-indigo-500 hover:bg-indigo-600 text-white font-bold py-3 px-6 rounded-lg shadow-lg transition duration-300 ease-in-out transform hover:scale-105"
-                            >
-                                Join Game
-                            </button>
+                            <button onClick={onJoin} className="w-full bg-indigo-500 hover:bg-indigo-600 text-white font-bold py-3 px-6 rounded-lg shadow-lg transition duration-300 ease-in-out transform hover:scale-105">Join Game</button>
                         </div>
                         {error && <p className="text-red-500 text-sm mt-2 text-center">{error}</p>}
                     </div>
@@ -541,69 +521,30 @@
             );
 
             const ScorerView = () => {
-                if (!gameId) {
-                    return <GameLobby onJoin={handleJoinGame} onCreate={handleCreateGame} />;
-                }
-                
+                if (!gameId) return <GameLobby onJoin={handleJoinGame} onCreate={handleCreateGame} />;
                 return (
                     <div className="flex flex-col h-full bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-gray-200 p-4 sm:p-6">
                         <div className="flex justify-between items-center mb-6">
                             <h1 className="text-3xl font-bold">Score Entry</h1>
                             <div className="flex space-x-2">
-                                <button
-                                    onClick={() => setCurrentView('display')}
-                                    className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded-full shadow-lg transition duration-300 ease-in-out transform hover:scale-105"
-                                >
-                                    <TrophyIcon className="inline-block mr-2 h-5 w-5" /> Display View
-                                </button>
-                                <button
-                                    onClick={() => setShowScoringGuide(true)}
-                                    className="bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded-full shadow-lg transition duration-300 ease-in-out transform hover:scale-105"
-                                >
-                                    Scoring
-                                </button>
+                                <button onClick={() => setCurrentView('display')} className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded-full shadow-lg transition duration-300 ease-in-out transform hover:scale-105"><TrophyIcon className="inline-block mr-2 h-5 w-5" /> Display View</button>
+                                <button onClick={() => setShowScoringGuide(true)} className="bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded-full shadow-lg transition duration-300 ease-in-out transform hover:scale-105">Scoring</button>
                             </div>
                         </div>
-                        
                         <div className="flex items-center justify-between mb-4 bg-gray-200 dark:bg-gray-800 p-3 rounded-lg">
                             <p className="font-semibold text-lg">Game ID: <span className="font-bold text-indigo-500">{gameId}</span></p>
-                            <button
-                                onClick={handleLeaveGame}
-                                className="text-red-500 hover:text-red-700 text-sm font-semibold"
-                            >
-                                Leave Game
-                            </button>
+                            <button onClick={handleLeaveGame} className="text-red-500 hover:text-red-700 text-sm font-semibold">Leave Game</button>
                         </div>
-
                         <div className="mb-6">
                             <h2 className="text-2xl font-semibold mb-2">Add Player</h2>
                             <div className="flex space-x-2">
-                                <input
-                                    ref={nameInputRef}
-                                    type="text"
-                                    placeholder="Enter player name"
-                                    className="flex-grow p-3 rounded-lg border-2 border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                                    onKeyDown={(e) => e.key === 'Enter' && handleAddPlayer()}
-                                />
-                                <button
-                                    onClick={handleAddPlayer}
-                                    className="bg-green-500 hover:bg-green-600 text-white p-3 rounded-lg shadow-md transition duration-300 ease-in-out transform hover:scale-105"
-                                >
-                                    <PlusIcon className="h-6 w-6" />
-                                </button>
+                                <input ref={nameInputRef} type="text" placeholder="Enter player name" className="flex-grow p-3 rounded-lg border-2 border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-indigo-500" onKeyDown={(e) => e.key === 'Enter' && handleAddPlayer()} />
+                                <button onClick={handleAddPlayer} className="bg-green-500 hover:bg-green-600 text-white p-3 rounded-lg shadow-md transition duration-300 ease-in-out transform hover:scale-105"><PlusIcon className="h-6 w-6" /></button>
                             </div>
                         </div>
-
                         <div className="flex-grow overflow-y-auto">
-                            {isGameLoading ? (
-                                    <div className="flex flex-col items-center">
-                                        <DiceIcon className="text-6xl animate-spin text-indigo-500" />
-                                        <p className="mt-4 text-xl font-semibold">Loading game data...</p>
-                                    </div>
-                                ) : players.length === 0 ? (
-                                <p className="text-center text-gray-400 text-2xl font-semibold">
-                                    No players added yet.
-                                </p>
+                            {players.length === 0 ? (
+                                <p className="text-center text-gray-400 text-2xl font-semibold">No players added yet.</p>
                             ) : (
                                 players.map((player, index) => (
                                     <div key={player.id} className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-md mb-4 flex items-center justify-between">
@@ -612,124 +553,55 @@
                                             <p className="text-lg text-gray-500 dark:text-gray-400">Score: {player.score}</p>
                                         </div>
                                         <div className="flex items-center space-x-2">
-                                            <input
-                                                ref={el => scoreInputRefs.current[index] = el}
-                                                type="text"
-                                                inputMode="numeric"
-                                                pattern="[0-9]*"
-                                                maxLength="6"
-                                                placeholder="Points"
-                                                className="w-24 p-2 rounded-lg border-2 border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-700 text-center focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                                                onKeyDown={(e) => e.key === 'Enter' && handleUpdateScore(index)}
-                                            />
-                                            <button
-                                                onClick={() => handleUpdateScore(index)}
-                                                className="bg-indigo-500 hover:bg-indigo-600 text-white p-3 rounded-lg shadow-md transition duration-300 ease-in-out transform hover:scale-105"
-                                            >
-                                                <PlusIcon className="h-6 w-6" />
-                                            </button>
-                                            <button
-                                                onClick={() => handleConfirm(() => handleDeletePlayer(index), 'Are you sure you want to remove this player?')}
-                                                className="bg-red-500 hover:bg-red-600 text-white p-2 rounded-lg shadow-md transition duration-300 ease-in-out transform hover:scale-105"
-                                            >
-                                                <CloseIcon className="h-5 w-5" />
-                                            </button>
+                                            <input ref={el => scoreInputRefs.current[index] = el} type="text" inputMode="numeric" pattern="[0-9]*" maxLength="6" placeholder="Points" className="w-24 p-2 rounded-lg border-2 border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-700 text-center focus:outline-none focus:ring-2 focus:ring-indigo-500" onKeyDown={(e) => e.key === 'Enter' && handleUpdateScore(index)} />
+                                            <button onClick={() => handleUpdateScore(index)} className="bg-indigo-500 hover:bg-indigo-600 text-white p-3 rounded-lg shadow-md transition duration-300 ease-in-out transform hover:scale-105"><PlusIcon className="h-6 w-6" /></button>
+                                            <button onClick={() => handleConfirm(() => handleDeletePlayer(index), 'Are you sure you want to remove this player?')} className="bg-red-500 hover:bg-red-600 text-white p-2 rounded-lg shadow-md transition duration-300 ease-in-out transform hover:scale-105"><CloseIcon className="h-5 w-5" /></button>
                                         </div>
                                     </div>
                                 ))
                             )}
                         </div>
-
                         <div className="mt-6 flex flex-col sm:flex-row justify-center space-y-4 sm:space-y-0 sm:space-x-4">
-                            <button
-                                onClick={() => handleConfirm(handleResetScores, 'Are you sure you want to reset all scores?')}
-                                className="bg-red-500 hover:bg-red-600 text-white font-bold py-3 px-6 rounded-lg shadow-lg transition duration-300 ease-in-out transform hover:scale-105"
-                            >
-                                Reset Scores
-                            </button>
-                            <button
-                                onClick={() => setCurrentView('display')}
-                                className="bg-gray-500 hover:bg-gray-600 text-white font-bold py-3 px-6 rounded-lg shadow-lg transition duration-300 ease-in-out transform hover:scale-105"
-                            >
-                                View Scoreboard
-                            </button>
+                            <button onClick={() => handleConfirm(handleResetScores, 'Are you sure you want to reset all scores?')} className="bg-red-500 hover:bg-red-600 text-white font-bold py-3 px-6 rounded-lg shadow-lg transition duration-300 ease-in-out transform hover:scale-105">Reset Scores</button>
+                            <button onClick={() => setCurrentView('display')} className="bg-gray-500 hover:bg-gray-600 text-white font-bold py-3 px-6 rounded-lg shadow-lg transition duration-300 ease-in-out transform hover:scale-105">View Scoreboard</button>
                         </div>
                     </div>
                 );
             };
 
             const DisplayView = () => {
-                if (!gameId) {
-                    return <GameLobby onJoin={handleJoinGame} onCreate={handleCreateGame} />;
-                }
-                
+                if (!gameId) return <GameLobby onJoin={handleJoinGame} onCreate={handleCreateGame} />;
                 const winningScore = players.reduce((max, player) => Math.max(max, player.score), 0);
                 const hasWinner = winningScore >= 10000;
-                
                 return (
                     <div className="flex flex-col h-full bg-gray-900 text-white font-sans p-6 md:p-12">
                         <div className="flex justify-between items-center mb-8">
-                            <h1 className="text-4xl md:text-6xl font-extrabold tracking-tight">
-                                Farkle Scoreboard
-                            </h1>
+                            <h1 className="text-4xl md:text-6xl font-extrabold tracking-tight">Farkle Scoreboard</h1>
                             <div className="flex space-x-2">
-                                <button
-                                    onClick={() => setCurrentView('scorer')}
-                                    className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-6 rounded-full shadow-lg transition duration-300 ease-in-out transform hover:scale-105"
-                                >
-                                    <DiceIcon className="inline-block mr-2 h-5 w-5" /> Enter Scores
-                                </button>
-                                <button
-                                    onClick={() => setShowScoringGuide(true)}
-                                    className="bg-gray-500 hover:bg-gray-600 text-white font-bold py-3 px-6 rounded-full shadow-lg transition duration-300 ease-in-out transform hover:scale-105"
-                                >
-                                    Scoring
-                                </button>
+                                <button onClick={() => setCurrentView('scorer')} className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-6 rounded-full shadow-lg transition duration-300 ease-in-out transform hover:scale-105"><DiceIcon className="inline-block mr-2 h-5 w-5" /> Enter Scores</button>
+                                <button onClick={() => setShowScoringGuide(true)} className="bg-gray-500 hover:bg-gray-600 text-white font-bold py-3 px-6 rounded-full shadow-lg transition duration-300 ease-in-out transform hover:scale-105">Scoring</button>
                             </div>
                         </div>
-                        
                         <div className="flex items-center justify-between mb-4">
                             <p className="font-semibold text-xl md:text-2xl">Game ID: <span className="font-bold text-yellow-400">{gameId}</span></p>
-                            <button
-                                onClick={handleLeaveGame}
-                                className="text-red-500 hover:text-red-700 text-sm font-semibold"
-                            >
-                                Leave Game
-                            </button>
+                            <button onClick={handleLeaveGame} className="text-red-500 hover:text-red-700 text-sm font-semibold">Leave Game</button>
                         </div>
-
                         <div className="flex-grow grid grid-cols-1 gap-6 overflow-y-auto">
-                            {isGameLoading ? (
-                                <div className="md:col-span-3 flex flex-col items-center justify-center">
-                                    <DiceIcon className="text-6xl animate-spin text-indigo-500" />
-                                    <p className="mt-4 text-xl font-semibold">Loading game data...</p>
-                                </div>
-                            ) : players.length === 0 ? (
-                                <p className="md:col-span-3 text-center text-gray-400 text-2xl font-semibold">
-                                    No players added yet.
-                                </p>
+                            {players.length === 0 ? (
+                                <p className="md:col-span-3 text-center text-gray-400 text-2xl font-semibold">No players added yet.</p>
                             ) : (
-                                players.map((player, index) => {
-                                    const winningScore = players[0].score;
+                                players.map((player) => {
                                     const scoreColor = hasWinner && player.score === winningScore ? 'text-gold-400' : 'text-white';
                                     const scoreFontWeight = hasWinner && player.score === winningScore ? 'font-extrabold' : 'font-bold';
-                                    
                                     const scoreDifference = player.score - winningScore;
-
                                     return (
                                         <div key={player.id} className="bg-gray-800 rounded-xl shadow-lg p-6 flex flex-col items-center text-center transition-all duration-300 transform hover:scale-105">
                                             <p className="text-2xl md:text-3xl font-semibold text-gray-300 truncate w-full mb-1">{player.name}</p>
-                                            <p className={`text-5xl md:text-6xl ${scoreFontWeight} ${scoreColor} mb-2`}>
-                                                {player.score}
-                                            </p>
+                                            <p className={`text-5xl md:text-6xl ${scoreFontWeight} ${scoreColor} mb-2`}>{player.score}</p>
                                             {hasWinner && (
                                                 <div className="mt-2 flex flex-col items-center">
-                                                    {player.score === winningScore && (
-                                                        <TrophyIcon className="text-gold-400 h-10 w-10 mb-2 animate-bounce" />
-                                                    )}
-                                                    <p className="text-red-400 text-xl font-bold">
-                                                        {scoreDifference}
-                                                    </p>
+                                                    {player.score === winningScore && <TrophyIcon className="text-gold-400 h-10 w-10 mb-2 animate-bounce" />}
+                                                    <p className="text-red-400 text-xl font-bold">{scoreDifference}</p>
                                                 </div>
                                             )}
                                         </div>
@@ -743,13 +615,7 @@
 
             return (
                 <div className="min-h-screen flex flex-col bg-gray-100 dark:bg-gray-900">
-                    {showConfirm && (
-                        <ConfirmationModal
-                            message={confirmMessage}
-                            onConfirm={() => handleConfirmDecision(true)}
-                            onCancel={() => handleConfirmDecision(false)}
-                        />
-                    )}
+                    {showConfirm && <ConfirmationModal message={confirmMessage} onConfirm={() => handleConfirmDecision(true)} onCancel={() => handleConfirmDecision(false)} />}
                     {showScoringGuide && <ScoringGuide onClose={() => setShowScoringGuide(false)} />}
                     {currentView === 'scorer' && <ScorerView />}
                     {currentView === 'display' && <DisplayView />}
