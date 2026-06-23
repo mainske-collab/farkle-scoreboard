@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Farkle Scoreboard</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -24,7 +24,7 @@
     <style>
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #1a202c;
+            background-color: #111827; /* Midnight slate baseline background */
             min-height: 100vh;
         }
         #root {
@@ -32,8 +32,8 @@
         }
     </style>
 </head>
-<body>
-    <div id="root"></div>
+<body class="bg-gray-900">
+    <div id="root" class="bg-gray-900"></div>
 
     <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
@@ -43,7 +43,7 @@
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 
     <script>
-        console.log("Farkle Scoreboard: Version 1.5.0 Native Engine Active");
+        console.log("Farkle Scoreboard: Version 1.7.0 Mobile Scaling Active");
 
         const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {
             apiKey: "AIzaSyClININqtn0HoO3ovVj8nJPlWKn9N5Lx90",
@@ -71,7 +71,6 @@
     </script>
     
     <script>
-        console.log("Native Runtime status: Executing standard browser build layout.");
         const { useState, useEffect, useRef } = React;
         const e = React.createElement;
 
@@ -97,9 +96,9 @@
             );
 
         const ScoringGuide = ({ onClose }) => {
-            const row = (comb, pts) => e('tr', { className: 'border-b border-gray-700' },
-                e('td', { className: 'py-3 px-4 flex items-center' }, e('span', { className: 'text-2xl font-bold mr-2' }, comb.split(' ')[0]), comb.split(' ').slice(1).join(' ')),
-                e('td', { className: 'py-3 px-4 text-right font-bold text-lg' }, pts)
+            const row = (comb, pts) => e('tr', { className: 'border-b border-gray-700 text-white' },
+                e('td', { className: 'py-3 px-4 flex items-center' }, e('span', { className: 'text-2xl font-bold mr-2 text-yellow-400' }, comb.split(' ')[0]), comb.split(' ').slice(1).join(' ')),
+                e('td', { className: 'py-3 px-4 text-right font-bold text-lg text-white' }, pts)
             );
             return e('div', { className: 'fixed inset-0 bg-gray-900 bg-opacity-95 flex flex-col items-center justify-center p-4 z-50 overflow-y-auto' },
                 e('div', { className: 'bg-gray-800 text-white rounded-lg shadow-xl p-6 md:p-10 max-w-2xl w-full' },
@@ -259,16 +258,16 @@
 
             if (loading || !isAuthReady) {
                 return window.auth && window.db ? 
-                    e('div', { className: 'flex items-center justify-center min-h-screen text-gray-200' }, 
-                        e('div', { className: 'flex flex-col items-center' }, e(DiceIcon, { className: 'text-6xl animate-spin text-indigo-500' }), e('p', { className: 'mt-4 text-xl font-semibold' }, 'Connecting...'))
+                    e('div', { className: 'flex items-center justify-center min-h-screen text-white bg-gray-900' }, 
+                        e('div', { className: 'flex flex-col items-center' }, e(DiceIcon, { className: 'text-6xl animate-spin text-indigo-500' }), e('p', { className: 'mt-4 text-xl font-semibold text-white' }, 'Connecting...'))
                     ) : null;
             }
 
             if (error) return e('div', { className: 'flex items-center justify-center min-h-screen bg-red-100 text-red-800 p-4' }, e('p', null, error));
 
-            const ConfirmationModal = () => e('div', { className: 'fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center z-50' },
-                e('div', { className: 'bg-gray-800 p-6 rounded-lg shadow-xl max-w-sm mx-auto text-white' },
-                    e('p', { className: 'text-lg font-semibold mb-4' }, confirmMessage),
+            const ConfirmationModal = () => e('div', { className: 'fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center z-50 p-4' },
+                e('div', { className: 'bg-gray-800 p-6 rounded-lg shadow-xl max-w-sm w-full mx-auto text-white' },
+                    e('p', { className: 'text-lg font-semibold mb-4 text-white' }, confirmMessage),
                     e('div', { className: 'flex justify-end space-x-4' },
                         e('button', { onClick: () => handleConfirmDecision(false), className: 'px-4 py-2 rounded-lg text-gray-300 hover:bg-gray-700' }, 'Cancel'),
                         e('button', { onClick: () => handleConfirmDecision(true), className: 'px-4 py-2 rounded-lg bg-red-500 text-white hover:bg-red-600' }, 'Confirm')
@@ -277,52 +276,52 @@
             );
 
             if (!gameId) {
-                return e('div', { className: 'flex flex-col items-center justify-center min-h-screen p-4 text-white' },
-                    e('h1', { className: 'text-3xl font-bold mb-6' }, 'Start a New Game'),
+                return e('div', { className: 'flex flex-col items-center justify-center min-h-screen p-4 text-white bg-gray-900' },
+                    e('h1', { className: 'text-3xl font-bold mb-6 text-white' }, 'Start a New Game'),
                     e('div', { className: 'w-full max-w-sm' },
-                        e('button', { onClick: handleCreateGame, className: 'w-full mb-4 bg-green-500 hover:bg-green-600 font-bold py-3 px-6 rounded-lg shadow-lg' }, 'Create New Game'),
+                        e('button', { onClick: handleCreateGame, className: 'w-full mb-4 bg-green-500 hover:bg-green-600 font-bold py-3 px-6 rounded-lg shadow-lg text-white' }, 'Create New Game'),
                         e('div', { className: 'flex items-center space-x-2 my-4' }, e('hr', { className: 'flex-grow border-gray-600' }), e('span', { className: 'text-gray-400' }, 'or'), e('hr', { className: 'flex-grow border-gray-600' })),
                         e('div', { className: 'mb-4' }, e('input', { ref: gameIdInputRef, type: 'text', placeholder: 'Enter Game ID', className: 'w-full p-3 rounded-lg bg-gray-800 border border-gray-700 text-center text-white focus:outline-none focus:ring-2 focus:ring-indigo-500', onKeyDown: (e) => e.key === 'Enter' && handleJoinGame() })),
-                        e('button', { onClick: handleJoinGame, className: 'w-full bg-indigo-500 hover:bg-indigo-600 font-bold py-3 px-6 rounded-lg shadow-lg' }, 'Join Game')
+                        e('button', { onClick: handleJoinGame, className: 'w-full bg-indigo-500 hover:bg-indigo-600 font-bold py-3 px-6 rounded-lg shadow-lg text-white' }, 'Join Game')
                     )
                 );
             }
 
             if (currentView === 'scorer') {
-                return e('div', { className: 'flex flex-col min-h-screen text-white p-4 sm:p-6' },
+                return e('div', { className: 'flex flex-col min-h-screen bg-gray-900 text-white p-4 sm:p-6' },
                     e('div', { className: 'flex justify-between items-center mb-6' },
-                        e('h1', { className: 'text-3xl font-bold' }, 'Score Entry'),
+                        e('h1', { className: 'text-2xl sm:text-3xl font-bold text-white' }, 'Score Entry'),
                         e('div', { className: 'flex space-x-2' },
-                            e('button', { onClick: () => setCurrentView('display'), className: 'bg-indigo-600 font-bold py-2 px-4 rounded-full flex items-center' }, e(TrophyIcon, { className: 'mr-2 h-5 w-5' }), 'Display View'),
-                            e('button', { onClick: () => setShowScoringGuide(true), className: 'bg-gray-600 font-bold py-2 px-4 rounded-full' }, 'Scoring')
+                            e('button', { onClick: () => setCurrentView('display'), className: 'bg-indigo-600 font-bold py-2 px-3 sm:px-4 rounded-full flex items-center text-sm sm:text-base text-white' }, e(TrophyIcon, { className: 'mr-1 sm:mr-2 h-4 w-4 sm:h-5 sm:w-5' }), 'Display'),
+                            e('button', { onClick: () => setShowScoringGuide(true), className: 'bg-gray-600 font-bold py-2 px-3 sm:px-4 rounded-full text-sm sm:text-base text-white' }, 'Scoring')
                         )
                     ),
                     e('div', { className: 'flex items-center justify-between mb-4 bg-gray-800 p-3 rounded-lg' },
-                        e('p', { className: 'font-semibold' }, 'Game ID: ', e('span', { className: 'text-indigo-400 font-bold' }, gameId)),
+                        e('p', { className: 'font-semibold text-white' }, 'Game ID: ', e('span', { className: 'text-indigo-400 font-bold' }, gameId)),
                         e('button', { onClick: () => setGameId(''), className: 'text-red-400 font-semibold text-sm' }, 'Leave Game')
                     ),
                     e('div', { className: 'mb-6' },
-                        e('h2', { className: 'text-xl font-semibold mb-2' }, 'Add Player'),
+                        e('h2', { className: 'text-xl font-semibold mb-2 text-white' }, 'Add Player'),
                         e('div', { className: 'flex space-x-2' },
                             e('input', { ref: nameInputRef, type: 'text', placeholder: 'Enter player name', className: 'flex-grow p-3 rounded-lg bg-gray-800 border border-gray-700 text-white focus:outline-none focus:ring-2 focus:ring-indigo-500', onKeyDown: (e) => e.key === 'Enter' && handleAddPlayer() }),
-                            e('button', { onClick: handleAddPlayer, className: 'bg-green-500 p-3 rounded-lg' }, e(PlusIcon, { className: 'h-6 w-6' }))
+                            e('button', { onClick: handleAddPlayer, className: 'bg-green-500 p-3 rounded-lg text-white' }, e(PlusIcon, { className: 'h-6 w-6' }))
                         )
                     ),
                     e('div', { className: 'flex-grow overflow-y-auto' },
-                        isGameLoading ? e('div', { className: 'text-center p-4' }, 'Loading players...') :
-                        players.length === 0 ? e('p', { className: 'text-center text-gray-500' }, 'No players added yet.') :
-                        players.map((p, idx) => e('div', { key: p.id, className: 'bg-gray-800 p-4 rounded-lg mb-4 flex items-center justify-between' },
-                            e('div', null, e('p', { className: 'text-xl font-semibold' }, p.name), e('p', { className: 'text-gray-400' }, 'Score: ', p.score)),
-                            e('div', { className: 'flex items-center space-x-2' },
-                                e('input', { ref: el => scoreInputRefs.current[idx] = el, type: 'text', inputMode: 'numeric', pattern: '[0-9]*', placeholder: 'Points', className: 'w-20 p-2 rounded-lg bg-gray-700 border border-gray-600 text-center text-white', onKeyDown: (e) => e.key === 'Enter' && handleUpdateScore(idx) }),
-                                e('button', { onClick: () => handleUpdateScore(idx), className: 'bg-indigo-500 p-2 rounded-lg' }, e(PlusIcon, { className: 'h-5 w-5' })),
-                                e('button', { onClick: () => handleConfirm(() => handleDeletePlayer(idx), 'Remove this player?'), className: 'bg-red-500 p-2 rounded-lg' }, e(CloseIcon, { className: 'h-5 w-5' }))
+                        isGameLoading ? e('div', { className: 'text-center p-4 text-white' }, 'Loading players...') :
+                        players.length === 0 ? e('p', { className: 'text-center text-gray-500 py-8' }, 'No players added yet.') :
+                        players.map((p, idx) => e('div', { key: p.id, className: 'bg-gray-800 p-4 rounded-lg mb-4 flex items-center justify-between text-white' },
+                            e('div', { className: 'flex-grow pr-2 truncate' }, e('p', { className: 'text-xl font-semibold text-white truncate' }, p.name), e('p', { className: 'text-gray-400' }, 'Score: ', p.score)),
+                            e('div', { className: 'flex items-center space-x-1 sm:space-x-2 flex-shrink-0' },
+                                e('input', { ref: el => scoreInputRefs.current[idx] = el, type: 'text', inputMode: 'numeric', pattern: '[0-9]*', placeholder: 'Points', className: 'w-16 sm:w-20 p-2 rounded-lg bg-gray-700 border border-gray-600 text-center text-white focus:outline-none', onKeyDown: (e) => e.key === 'Enter' && handleUpdateScore(idx) }),
+                                e('button', { onClick: () => handleUpdateScore(idx), className: 'bg-indigo-500 p-2 rounded-lg text-white' }, e(PlusIcon, { className: 'h-5 w-5' })),
+                                e('button', { onClick: () => handleConfirm(() => handleDeletePlayer(idx), `Remove ${p.name}?`), className: 'bg-red-500 p-2 rounded-lg text-white' }, e(CloseIcon, { className: 'h-5 w-5' }))
                             )
                         ))
                     ),
                     e('div', { className: 'mt-6 flex justify-center space-x-4' },
-                        e('button', { onClick: () => handleConfirm(handleResetScores, 'Reset all player scores to 0?'), className: 'bg-red-500 font-bold py-3 px-6 rounded-lg shadow-lg' }, 'Reset Scores'),
-                        e('button', { onClick: () => setCurrentView('display'), className: 'bg-gray-600 font-bold py-3 px-6 rounded-lg shadow-lg' }, 'View Scoreboard')
+                        e('button', { onClick: () => handleConfirm(handleResetScores, 'Reset all player scores to 0?'), className: 'bg-red-500 font-bold py-3 px-4 sm:px-6 rounded-lg shadow-lg text-white text-sm sm:text-base flex-1 sm:flex-initial text-center' }, 'Reset Scores'),
+                        e('button', { onClick: () => setCurrentView('display'), className: 'bg-gray-600 font-bold py-3 px-4 sm:px-6 rounded-lg shadow-lg text-white text-sm sm:text-base flex-1 sm:flex-initial text-center' }, 'View Board')
                     ),
                     showConfirm && e(ConfirmationModal),
                     showScoringGuide && e(ScoringGuide, { onClose: () => setShowScoringGuide(false) })
@@ -332,29 +331,29 @@
             const winningScore = players.reduce((max, p) => Math.max(max, p.score), 0);
             const hasWinner = winningScore >= 10000;
 
-            return e('div', { className: 'flex flex-col min-h-screen bg-gray-900 text-white p-6 md:p-12' },
-                e('div', { className: 'flex justify-between items-center mb-8' },
-                    e('h1', { className: 'text-4xl md:text-6xl font-extrabold' }, 'Farkle Scoreboard'),
+            return e('div', { className: 'flex flex-col min-h-screen bg-gray-900 text-white p-4 sm:p-6 md:p-12' },
+                e('div', { className: 'flex justify-between items-center mb-6' },
+                    e('h1', { className: 'text-2xl sm:text-4xl md:text-6xl font-extrabold text-white' }, 'Farkle Board'),
                     e('div', { className: 'flex space-x-2' },
-                        e('button', { onClick: () => setCurrentView('scorer'), className: 'bg-indigo-600 font-bold py-3 px-6 rounded-full flex items-center' }, e(DiceIcon, { className: 'mr-2 h-5 w-5' }), 'Enter Scores'),
-                        e('button', { onClick: () => setShowScoringGuide(true), className: 'bg-gray-500 font-bold py-3 px-6 rounded-full' }, 'Scoring')
+                        e('button', { onClick: () => setCurrentView('scorer'), className: 'bg-indigo-600 font-bold py-2 px-3 sm:px-6 rounded-full flex items-center text-sm sm:text-base text-white' }, e(DiceIcon, { className: 'mr-1 sm:mr-2 h-4 w-4 sm:h-5 sm:w-5' }), 'Scores'),
+                        e('button', { onClick: () => setShowScoringGuide(true), className: 'bg-gray-500 font-bold py-2 px-3 sm:px-6 rounded-full text-sm sm:text-base text-white' }, 'Scoring')
                     )
                 ),
                 e('div', { className: 'flex items-center justify-between mb-6 bg-gray-800 p-3 rounded-lg' },
-                    e('p', { className: 'font-semibold text-lg' }, 'Game ID: ', e('span', { className: 'text-yellow-400 font-bold' }, gameId)),
+                    e('p', { className: 'font-semibold text-base sm:text-lg text-white' }, 'Game ID: ', e('span', { className: 'text-yellow-400 font-bold' }, gameId)),
                     e('button', { onClick: () => setGameId(''), className: 'text-red-400 font-semibold text-sm' }, 'Leave Game')
                 ),
-                e('div', { className: 'flex-grow grid grid-cols-1 md:grid-cols-2 gap-6 overflow-y-auto' },
-                    isGameLoading ? e('div', { className: 'col-span-full text-center' }, 'Loading scoreboard...') :
-                    players.length === 0 ? e('p', { className: 'col-span-full text-center text-gray-500' }, 'No players added yet.') :
+                e('div', { className: 'flex-grow grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 overflow-y-auto' },
+                    isGameLoading ? e('div', { className: 'col-span-full text-center text-white' }, 'Loading scoreboard...') :
+                    players.length === 0 ? e('p', { className: 'col-span-full text-center text-gray-500 py-8' }, 'No players added yet.') :
                     players.map((p) => {
                         const isLeader = hasWinner && p.score === winningScore;
-                        return e('div', { key: p.id, className: 'bg-gray-800 rounded-xl p-6 flex flex-col items-center text-center border ' + (isLeader ? 'border-yellow-500 shadow-yellow-500/20 shadow-lg' : 'border-gray-700') },
-                            e('p', { className: 'text-2xl font-semibold text-gray-300 truncate w-full' }, p.name),
-                            e('p', { className: 'text-5xl md:text-6xl font-black mt-2 ' + (isLeader ? 'text-yellow-400' : 'text-white') }, p.score),
+                        return e('div', { key: p.id, className: 'bg-gray-800 rounded-xl p-4 sm:p-6 flex flex-col items-center text-center border ' + (isLeader ? 'border-yellow-500 shadow-yellow-500/20 shadow-lg' : 'border-gray-700') },
+                            e('p', { className: 'text-xl sm:text-2xl font-semibold text-gray-300 truncate w-full' }, p.name),
+                            e('p', { className: 'text-4xl sm:text-5xl md:text-6xl font-black mt-2 ' + (isLeader ? 'text-yellow-400' : 'text-white') }, p.score),
                             hasWinner && e('div', { className: 'mt-2 flex flex-col items-center' },
-                                isLeader ? e(TrophyIcon, { className: 'text-yellow-400 h-10 w-10 animate-bounce' }) :
-                                e('p', { className: 'text-red-400 text-xl font-bold' }, p.score - winningScore)
+                                isLeader ? e(TrophyIcon, { className: 'text-yellow-400 h-8 w-8 sm:h-10 sm:w-10 animate-bounce' }) :
+                                e('p', { className: 'text-red-400 text-lg sm:text-xl font-bold' }, p.score - winningScore)
                             )
                         );
                     })
