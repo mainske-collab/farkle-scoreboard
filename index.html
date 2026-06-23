@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=320, initial-scale=0.85, maximum-scale=0.85, user-scalable=no">
     <title>Farkle Scoreboard</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -26,15 +26,17 @@
             font-family: 'Inter', sans-serif;
             background-color: #1a202c;
             min-height: 100vh;
-            /* CHANGED: Boost core scaling baseline by ~50% everywhere on smaller screen widths */
-            font-size: 1.25rem; 
         }
         #root {
             min-height: 100vh;
         }
+        /* CHANGED: Globally force root layout text targets to scale up aggressively on mobile */
+        html {
+            font-size: 135% !important;
+        }
         @media (max-width: 768px) {
             html {
-                font-size: 120%; /* Amplifies tailwind class outputs (rem units) across mobile viewports */
+                font-size: 150% !important; /* Forces 2x baseline scaling factors across phone layouts */
             }
         }
     </style>
@@ -50,7 +52,7 @@
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 
     <script>
-        console.log("Farkle Scoreboard: Version 1.10.0 Super-Scale Active");
+        console.log("Farkle Scoreboard: Version 1.11.0 2x Max-Scale Active");
 
         const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {
             apiKey: "AIzaSyClININqtn0HoO3ovVj8nJPlWKn9N5Lx90",
@@ -104,8 +106,8 @@
 
         const ScoringGuide = ({ onClose }) => {
             const row = (comb, pts) => e('tr', { className: 'border-b border-gray-700' },
-                e('td', { className: 'py-4 px-4 flex items-center text-lg sm:text-xl' }, e('span', { className: 'text-3xl font-bold mr-2' }, comb.split(' ')[0]), comb.split(' ').slice(1).join(' ')),
-                e('td', { className: 'py-4 px-4 text-right font-black text-xl' }, pts)
+                e('td', { className: 'py-4 px-4 flex items-center text-xl sm:text-2xl' }, e('span', { className: 'text-3xl font-bold mr-2' }, comb.split(' ')[0]), comb.split(' ').slice(1).join(' ')),
+                e('td', { className: 'py-4 px-4 text-right font-black text-2xl' }, pts)
             );
             return e('div', { className: 'fixed inset-0 bg-gray-900 bg-opacity-95 flex flex-col items-center justify-center p-4 z-50 overflow-y-auto' },
                 e('div', { className: 'bg-gray-800 text-white rounded-xl shadow-xl p-6 md:p-10 max-w-2xl w-full' },
@@ -117,8 +119,8 @@
                         e('table', { className: 'w-full text-left border-collapse' },
                             e('thead', null,
                                 e('tr', null,
-                                    e('th', { className: 'py-3 px-4 border-b-2 border-gray-600 text-gray-400 font-bold text-base sm:text-lg' }, 'Combination'),
-                                    e('th', { className: 'py-3 px-4 border-b-2 border-gray-600 text-gray-400 font-bold text-base sm:text-lg text-right' }, 'Points')
+                                    e('th', { className: 'py-3 px-4 border-b-2 border-gray-600 text-gray-400 font-bold text-lg' }, 'Combination'),
+                                    e('th', { className: 'py-3 px-4 border-b-2 border-gray-600 text-gray-400 font-bold text-lg text-right' }, 'Points')
                                 )
                             ),
                             e('tbody', null,
@@ -285,96 +287,93 @@
 
             const ConfirmationModal = ({ message, onConfirm, onCancel }) => e('div', { className: 'fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center z-50 p-4' },
                 e('div', { className: 'bg-white dark:bg-gray-800 p-8 rounded-xl shadow-2xl max-w-md w-full mx-auto text-center' },
-                    e('p', { className: 'text-xl font-bold text-gray-800 dark:text-white mb-6' }, message),
+                    e('p', { className: 'text-2xl font-bold text-gray-800 dark:text-white mb-6' }, message),
                     e('div', { className: 'flex justify-center space-x-4' },
-                        e('button', { onClick: onCancel, className: 'px-6 py-3 rounded-xl text-gray-700 dark:text-gray-200 bg-gray-100 dark:bg-gray-700 font-bold hover:bg-gray-200 text-base flex-1' }, 'Cancel'),
-                        e('button', { onClick: onConfirm, className: 'px-6 py-3 rounded-xl bg-red-500 text-white font-bold hover:bg-red-600 text-base flex-1 shadow-md' }, 'Confirm')
+                        e('button', { onClick: onCancel, className: 'px-6 py-3 rounded-xl text-gray-700 dark:text-gray-200 bg-gray-100 dark:bg-gray-700 font-bold hover:bg-gray-200 text-lg flex-1' }, 'Cancel'),
+                        e('button', { onClick: onConfirm, className: 'px-6 py-3 rounded-xl bg-red-500 text-white font-bold hover:bg-red-600 text-lg flex-1 shadow-md' }, 'Confirm')
                     )
                 )
             );
 
-            // SCALED GAME LOBBY
             if (!gameId) {
                 return e('div', { className: 'flex flex-col items-center justify-center min-h-screen p-6 bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-gray-200' },
-                    e('h1', { className: 'text-4xl sm:text-5xl font-black mb-8 tracking-tight text-center text-indigo-600 dark:text-indigo-400' }, 'Start a New Game'),
+                    e('h1', { className: 'text-4xl sm:text-5xl font-black mb-8 tracking-tight text-center text-indigo-600 dark:text-indigo-400' }, 'Farkle Scoreboard'),
                     e('div', { className: 'w-full max-w-md bg-white dark:bg-gray-800 p-8 rounded-2xl shadow-xl border border-gray-200 dark:border-gray-700' },
-                        e('button', { onClick: handleCreateGame, className: 'w-full mb-6 bg-green-500 hover:bg-green-600 text-white font-extrabold py-4 px-6 rounded-xl shadow-lg text-lg sm:text-xl transition duration-200' }, 'Create New Game'),
-                        e('div', { className: 'flex items-center space-x-2 my-5' }, e('hr', { className: 'flex-grow border-gray-300 dark:border-gray-600' }), e('span', { className: 'text-gray-500 dark:text-gray-400 font-bold text-base' }, 'or'), e('hr', { className: 'flex-grow border-gray-300 dark:border-gray-600' })),
-                        e('div', { className: 'mb-6' }, e('input', { ref: gameIdInputRef, type: 'text', placeholder: 'Enter Game ID', className: 'w-full p-4 rounded-xl border-2 border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 focus:outline-none focus:ring-4 focus:ring-indigo-500/20 text-center text-xl font-bold tracking-widest text-white', onKeyDown: (e) => e.key === 'Enter' && handleJoinGame() })),
-                        e('div', { className: 'flex' }, e('button', { onClick: handleJoinGame, className: 'flex-1 bg-indigo-500 hover:bg-indigo-600 text-white font-extrabold py-4 px-6 rounded-xl shadow-lg text-lg sm:text-xl transition duration-200' }, 'Join Game'))
+                        e('button', { onClick: handleCreateGame, className: 'w-full mb-6 bg-green-500 hover:bg-green-600 text-white font-extrabold py-5 px-6 rounded-xl shadow-lg text-xl sm:text-2xl transition duration-200' }, 'Create New Game'),
+                        e('div', { className: 'flex items-center space-x-2 my-5' }, e('hr', { className: 'flex-grow border-gray-300 dark:border-gray-600' }), e('span', { className: 'text-gray-500 dark:text-gray-400 font-bold text-lg' }, 'or'), e('hr', { className: 'flex-grow border-gray-300 dark:border-gray-600' })),
+                        e('div', { className: 'mb-6' }, e('input', { ref: gameIdInputRef, type: 'text', placeholder: 'Enter Game ID', className: 'w-full p-4 rounded-xl border-2 border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 focus:outline-none focus:ring-4 focus:ring-indigo-500/20 text-center text-2xl font-bold tracking-widest text-white', onKeyDown: (e) => e.key === 'Enter' && handleJoinGame() })),
+                        e('div', { className: 'flex' }, e('button', { onClick: handleJoinGame, className: 'flex-1 bg-indigo-500 hover:bg-indigo-600 text-white font-extrabold py-5 px-6 rounded-xl shadow-lg text-xl sm:text-2xl transition duration-200' }, 'Join Game'))
                     )
                 );
             }
 
-            // SCALED SCORERVIEW
             if (currentView === 'scorer') {
                 return e('div', { className: 'flex flex-col min-h-screen bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-gray-200 p-4 sm:p-8' },
                     e('div', { className: 'flex flex-col sm:flex-row sm:justify-between sm:items-center mb-6 space-y-4 sm:space-y-0' },
                         e('h1', { className: 'text-4xl font-black text-indigo-600 dark:text-white tracking-tight' }, 'Score Entry'),
                         e('div', { className: 'flex space-x-3 w-full sm:w-auto' },
-                            e('button', { onClick: () => setCurrentView('display'), className: 'flex-1 sm:flex-initial bg-indigo-600 hover:bg-indigo-700 text-white font-extrabold py-3 px-5 rounded-full shadow-md flex items-center justify-center text-base' }, e(TrophyIcon, { className: 'inline-block mr-2 h-5 w-5' }), 'Display View'),
-                            e('button', { onClick: () => setShowScoringGuide(true), className: 'bg-gray-500 hover:bg-gray-600 text-white font-extrabold py-3 px-6 rounded-full shadow-md text-base' }, 'Scoring')
+                            e('button', { onClick: () => setCurrentView('display'), className: 'flex-1 sm:flex-initial bg-indigo-600 hover:bg-indigo-700 text-white font-extrabold py-3 px-5 rounded-full shadow-md flex items-center justify-center text-lg' }, e(TrophyIcon, { className: 'inline-block mr-2 h-6 w-6' }), 'Display View'),
+                            e('button', { onClick: () => setShowScoringGuide(true), className: 'bg-gray-500 hover:bg-gray-600 text-white font-extrabold py-3 px-6 rounded-full shadow-md text-lg' }, 'Scoring')
                         )
                     ),
                     e('div', { className: 'flex items-center justify-between mb-6 bg-gray-200 dark:bg-gray-800 p-4 rounded-xl border border-gray-300 dark:border-gray-700' },
-                        e('p', { className: 'font-bold text-xl' }, 'Game ID: ', e('span', { className: 'font-black text-indigo-500 dark:text-yellow-400 tracking-wide' }, gameId)),
-                        e('button', { onClick: handleLeaveGame, className: 'text-red-500 hover:text-red-400 text-base font-extrabold tracking-wide uppercase' }, 'Leave Game')
+                        e('p', { className: 'font-bold text-2xl' }, 'Game ID: ', e('span', { className: 'font-black text-indigo-500 dark:text-yellow-400 tracking-wide' }, gameId)),
+                        e('button', { onClick: handleLeaveGame, className: 'text-red-500 hover:text-red-400 text-lg font-extrabold tracking-wide uppercase' }, 'Leave Game')
                     ),
                     e('div', { className: 'mb-8 bg-white dark:bg-gray-800 p-5 rounded-xl shadow-md border border-gray-200 dark:border-gray-700' },
-                        e('h2', { className: 'text-2xl font-bold mb-3' }, 'Add Player'),
+                        e('h2', { className: 'text-3xl font-extrabold mb-3 text-gray-900 dark:text-white' }, 'Add Player'),
                         e('div', { className: 'flex space-x-3' },
-                            e('input', { ref: nameInputRef, type: 'text', placeholder: 'Enter player name', className: 'flex-grow p-4 text-lg rounded-xl border-2 border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-white focus:outline-none focus:ring-4 focus:ring-indigo-500/20', onKeyDown: (e) => e.key === 'Enter' && handleAddPlayer() }),
-                            e('button', { onClick: handleAddPlayer, className: 'bg-green-500 hover:bg-green-600 text-white px-6 rounded-xl shadow-md flex items-center justify-center' }, e(PlusIcon, { className: 'h-7 w-7' }))
+                            e('input', { ref: nameInputRef, type: 'text', placeholder: 'Enter player name', className: 'flex-grow p-4 text-xl rounded-xl border-2 border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-white focus:outline-none focus:ring-4 focus:ring-indigo-500/20', onKeyDown: (e) => e.key === 'Enter' && handleAddPlayer() }),
+                            e('button', { onClick: handleAddPlayer, className: 'bg-green-500 hover:bg-green-600 text-white px-7 rounded-xl shadow-md flex items-center justify-center' }, e(PlusIcon, { className: 'h-8 w-8' }))
                         )
                     ),
                     e('div', { className: 'flex-grow overflow-y-auto space-y-4' },
                         isGameLoading ? e('div', { className: 'flex flex-col items-center py-10' }, e(DiceIcon, { className: 'text-6xl animate-spin text-indigo-500' }), e('p', { className: 'mt-4 text-xl font-bold' }, 'Loading game data...')) :
                         players.length === 0 ? e('p', { className: 'text-center text-gray-400 text-2xl font-bold py-12' }, 'No players added yet.') :
                         players.map((player, index) => e('div', { key: player.id, className: 'bg-white dark:bg-gray-800 p-5 rounded-xl shadow-md flex items-center justify-between border border-gray-200 dark:border-gray-700' },
-                            e('div', { className: 'flex-grow truncate pr-4' }, e('p', { className: 'text-2xl font-extrabold truncate text-gray-900 dark:text-white' }, player.name), e('p', { className: 'text-xl font-bold text-indigo-500 dark:text-indigo-400 mt-1' }, 'Score: ', player.score)),
+                            e('div', { className: 'flex-grow truncate pr-4' }, e('p', { className: 'text-3xl font-black truncate text-gray-900 dark:text-white' }, player.name), e('p', { className: 'text-2xl font-black text-indigo-500 dark:text-indigo-400 mt-1' }, 'Score: ', player.score)),
                             e('div', { className: 'flex items-center space-x-3 flex-shrink-0' },
-                                e('input', { ref: el => scoreInputRefs.current[index] = el, type: 'text', inputMode: 'numeric', pattern: '[0-9]*', maxLength: '6', placeholder: 'Points', className: 'w-28 p-3 text-lg font-bold rounded-xl border-2 border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-center text-white focus:outline-none focus:ring-2 focus:ring-indigo-500', onKeyDown: (e) => e.key === 'Enter' && handleUpdateScore(index) }),
-                                e('button', { onClick: () => handleUpdateScore(index), className: 'bg-indigo-500 hover:bg-indigo-600 text-white p-3.5 rounded-xl shadow-md' }, e(PlusIcon, { className: 'h-6 w-6' })),
-                                e('button', { onClick: () => handleConfirm(() => handleDeletePlayer(index), `Are you sure you want to remove ${player.name}?`), className: 'bg-red-500 hover:bg-red-600 text-white p-3.5 rounded-xl shadow-md' }, e(CloseIcon, { className: 'h-6 w-6' }))
+                                e('input', { ref: el => scoreInputRefs.current[index] = el, type: 'text', inputMode: 'numeric', pattern: '[0-9]*', maxLength: '6', placeholder: 'Points', className: 'w-32 p-4 text-xl font-bold rounded-xl border-2 border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-center text-white focus:outline-none focus:ring-2 focus:ring-indigo-500', onKeyDown: (e) => e.key === 'Enter' && handleUpdateScore(index) }),
+                                e('button', { onClick: () => handleUpdateScore(index), className: 'bg-indigo-500 hover:bg-indigo-600 text-white p-4 rounded-xl shadow-md' }, e(PlusIcon, { className: 'h-6 w-6' })),
+                                e('button', { onClick: () => handleConfirm(() => handleDeletePlayer(index), `Are you sure you want to remove ${player.name}?`), className: 'bg-red-500 hover:bg-red-600 text-white p-4 rounded-xl shadow-md' }, e(CloseIcon, { className: 'h-6 w-6' }))
                             )
                         ))
                     ),
                     e('div', { className: 'mt-8 flex flex-col sm:flex-row justify-center space-y-4 sm:space-y-0 sm:space-x-4 flex-shrink-0' },
-                        e('button', { onClick: () => handleConfirm(handleResetScores, 'Are you sure you want to reset all scores?'), className: 'bg-red-500 hover:bg-red-600 text-white font-extrabold py-4 px-8 rounded-xl shadow-lg text-lg flex-1 text-center' }, 'Reset Scores'),
-                        e('button', { onClick: () => setCurrentView('display'), className: 'bg-gray-500 hover:bg-gray-600 text-white font-extrabold py-4 px-8 rounded-xl shadow-lg text-lg flex-1 text-center' }, 'View Scoreboard')
+                        e('button', { onClick: () => handleConfirm(handleResetScores, 'Are you sure you want to reset all scores?'), className: 'bg-red-500 hover:bg-red-600 text-white font-extrabold py-5 px-8 rounded-xl shadow-lg text-xl sm:text-2xl flex-1 text-center' }, 'Reset Scores'),
+                        e('button', { onClick: () => setCurrentView('display'), className: 'bg-gray-500 hover:bg-gray-600 text-white font-extrabold py-5 px-8 rounded-xl shadow-lg text-xl sm:text-2xl flex-1 text-center' }, 'View Scoreboard')
                     )
                 );
             }
 
-            // SCALED DISPLAYVIEW
             const winningScore = players.reduce((max, player) => Math.max(max, player.score), 0);
             const hasWinner = winningScore >= 10000;
             
-            return e('div', { className: 'flex flex-col min-h-screen bg-gray-900 text-white font-sans p-4 sm:p-8 md:p-12' },
+            return e('div', { className: 'flex flex-col min-h-screen bg-gray-900 text-white p-4 sm:p-8 md:p-12' },
                 e('div', { className: 'flex flex-col sm:flex-row sm:justify-between sm:items-center mb-8 space-y-4 sm:space-y-0' },
                     e('h1', { className: 'text-4xl md:text-6xl font-black tracking-tight text-center sm:text-left' }, 'Farkle Scoreboard'),
                     e('div', { className: 'flex space-x-3 w-full sm:w-auto' },
-                        e('button', { onClick: () => setCurrentView('scorer'), className: 'flex-1 sm:flex-initial bg-indigo-600 hover:bg-indigo-700 text-white font-extrabold py-3.5 px-6 rounded-full shadow-lg text-base flex items-center justify-center' }, e(DiceIcon, { className: 'inline-block mr-2 h-5 w-5' }), 'Enter Scores'),
-                        e('button', { onClick: () => setShowScoringGuide(true), className: 'bg-gray-500 hover:bg-gray-600 text-white font-extrabold py-3.5 px-6 rounded-full shadow-lg text-base' }, 'Scoring')
+                        e('button', { onClick: () => setCurrentView('scorer'), className: 'flex-1 sm:flex-initial bg-indigo-600 hover:bg-indigo-700 text-white font-extrabold py-4 px-6 rounded-full shadow-lg text-lg flex items-center justify-center' }, e(DiceIcon, { className: 'inline-block mr-2 h-5 w-5' }), 'Enter Scores'),
+                        e('button', { onClick: () => setShowScoringGuide(true), className: 'bg-gray-500 hover:bg-gray-600 text-white font-extrabold py-4 px-6 rounded-full shadow-lg text-lg' }, 'Scoring')
                     )
                 ),
                 e('div', { className: 'flex items-center justify-between mb-6 bg-gray-800 p-4 rounded-xl border border-gray-700' },
-                    e('p', { className: 'font-bold text-xl md:text-2xl' }, 'Game ID: ', e('span', { className: 'font-black text-yellow-400' }, gameId)),
-                    e('button', { onClick: handleLeaveGame, className: 'text-red-500 hover:text-red-400 text-base font-extrabold tracking-wide uppercase' }, 'Leave Game')
+                    e('p', { className: 'font-bold text-2xl md:text-3xl' }, 'Game ID: ', e('span', { className: 'font-black text-yellow-400' }, gameId)),
+                    e('button', { onClick: handleLeaveGame, className: 'text-red-500 hover:text-red-400 text-lg font-extrabold tracking-wide uppercase' }, 'Leave Game')
                 ),
                 e('div', { className: 'flex-grow grid grid-cols-1 md:grid-cols-2 gap-6 overflow-y-auto' },
                     isGameLoading ? e('div', { className: 'md:col-span-2 flex flex-col items-center justify-center py-12' }, e(DiceIcon, { className: 'text-6xl animate-spin text-indigo-500' }), e('p', { className: 'mt-4 text-xl font-bold' }, 'Loading game data...')) :
-                    players.length === 0 ? e('p', { className: 'md:col-span-2 text-center text-gray-500 text-2xl font-bold py-12' }, 'No players added yet.') :
+                    players.length === 0 ? e('p', { className: 'md:col-span-2 text-center text-gray-500 text-3xl font-bold py-12' }, 'No players added yet.') :
                     players.map((player) => {
                         const scoreColor = hasWinner && player.score === winningScore ? 'text-gold-400' : 'text-white';
                         const scoreFontWeight = hasWinner && player.score === winningScore ? 'font-black' : 'font-bold';
                         const scoreDifference = player.score - winningScore;
                         return e('div', { key: player.id, className: 'bg-gray-800 rounded-xl shadow-lg p-6 flex flex-col items-center justify-center text-center border-2 border-gray-700' },
-                            e('p', { className: 'text-3xl font-extrabold text-gray-200 truncate w-full mb-2' }, player.name),
-                            e('p', { className: `text-6xl md:text-7xl ${scoreFontWeight} ${scoreColor} mb-2` }, player.score),
+                            e('p', { className: 'text-4xl font-black text-gray-200 truncate w-full mb-2' }, player.name),
+                            e('p', { className: `text-7xl md:text-8xl ${scoreFontWeight} ${scoreColor} mb-2` }, player.score),
                             hasWinner && e('div', { className: 'mt-3 flex flex-col items-center' },
-                                player.score === winningScore && e(TrophyIcon, { className: 'text-gold-400 h-12 w-12 mb-2 animate-bounce' }),
-                                e('p', { className: 'text-red-400 text-2xl font-black' }, scoreDifference)
+                                player.score === winningScore && e(TrophyIcon, { className: 'text-gold-400 h-14 w-14 mb-2 animate-bounce' }),
+                                e('p', { className: 'text-red-400 text-3xl font-black' }, scoreDifference)
                             )
                         );
                     })
@@ -389,7 +388,6 @@
             const [showScoringGuide, setShowScoringGuide] = useState(false);
             const [currentView, setCurrentView] = useState('scorer');
 
-            // Expose layout control state hooks globally for child sub-components
             window.setGlobalConfirm = (action, message) => { setConfirmAction(() => action); setConfirmMessage(message); setShowConfirm(true); };
             window.setGlobalScoring = (val) => setShowScoringGuide(val);
             window.setGlobalView = (val) => setCurrentView(val);
