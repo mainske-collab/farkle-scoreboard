@@ -55,7 +55,6 @@
             measurementId: "G-2N90ZMMJYC"
         };
 
-        // Initialize Firebase using the standard compat style
         if (!firebase.apps.length) {
             const app = firebase.initializeApp(firebaseConfig);
             window.db = firebase.firestore(app);
@@ -69,7 +68,7 @@
         const App = () => {
             const COLLECTION_NAME = 'farkle_games';
 
-            // --- SVGs ---
+            // --- UI Vectors ---
             const PlusIcon = ({ className }) => (
                 <svg xmlns="http://www.w3.org/2000/svg" className={className} viewBox="0 0 24 24" fill="currentColor">
                     <path d="M19 11h-6V5h-2v6H5v2h6v6h2v-6h6z" />
@@ -98,7 +97,7 @@
                 <svg xmlns="http://www.w3.org/2000/svg" className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
             );
 
-            // --- State ---
+            // --- App Matrix States ---
             const [players, setPlayers] = useState([]);
             const [isAuthReady, setIsAuthReady] = useState(false);
             const [userId, setUserId] = useState(null);
@@ -119,7 +118,7 @@
             const scoreInputRefs = useRef({});
             const unsubscribeFirestoreRef = useRef(null);
 
-            // --- Geolocation Tool ---
+            // --- Native Location Engine ---
             const fetchCityName = () => {
                 return new Promise((resolve) => {
                     if (!navigator.geolocation) resolve("Remote Location");
@@ -152,7 +151,7 @@
 
             const setupGameListener = (id) => {
                 if (!window.db) {
-                    setError('Firestore not initialized.');
+                    setError('Firestore engine not connected.');
                     return;
                 }
                 if (unsubscribeFirestoreRef.current) {
@@ -172,15 +171,15 @@
                             setGameLocation(data.location || 'Unknown Location');
                         } else {
                             setPlayers([]);
-                            setError(`Game '${id}' does not exist.`);
+                            setError(`Room Code '${id}' is empty or missing.`);
                         }
                     } catch (e) {
-                        setError('Failed to fetch data: ' + e.message);
+                        setError('Lookup failure: ' + e.message);
                     } finally {
                         setIsGameLoading(false);
                     }
                 }, (e) => {
-                    setError('Real-time updates failed: ' + e.message);
+                    setError('Stream broken: ' + e.message);
                     setIsGameLoading(false);
                 });
             };
@@ -208,7 +207,7 @@
                     setError(null);
                     setupGameListener(newGameId);
                 } catch (e) {
-                    setError('Failed to create game: ' + e.message);
+                    setError('Failed to deploy lobby: ' + e.message);
                 }
             };
 
@@ -220,7 +219,7 @@
                 const docSnap = await docRef.get();
 
                 if (!docSnap.exists) {
-                    setError(`No game found with ID: '${joinGameId}'.`);
+                    setError(`Room Code '${joinGameId}' not found.`);
                     return;
                 }
 
@@ -240,7 +239,7 @@
                     handleLeaveGame();
                     await fetchHistory();
                 } catch (e) {
-                    setError('Failed to archive game: ' + e.message);
+                    setError('Failed to archive: ' + e.message);
                 }
             };
 
@@ -261,7 +260,7 @@
                     setHistory(games);
                     setCurrentView('history');
                 } catch (e) {
-                    setError('History lookup failed.');
+                    setError('Travel vault lookup failed.');
                     console.error(e);
                 } finally {
                     setIsGameLoading(false);
@@ -270,7 +269,7 @@
 
             useEffect(() => {
                 if (!window.auth || !window.db) {
-                    setError('Firebase SDK error.');
+                    setError('Initialization error.');
                     setLoading(false);
                     return;
                 }
@@ -301,7 +300,7 @@
                 const updatedPlayers = players.map((p, idx) =>
                     idx === playerIndex ? { ...p, score: p.score + scoreToAdd } : p
                 );
-                await docRef.set({ updatedPlayers }, { merge: true });
+                await docRef.set({ players: updatedPlayers }, { merge: true });
                 inputElement.value = '';
             };
 
@@ -329,12 +328,12 @@
                 setCurrentView('scorer');
             };
 
-            // --- Sub-Components ---
+            // --- UI Panels ---
             const ScoringGuide = ({ onClose }) => (
                 <div className="fixed inset-0 bg-gray-900 bg-opacity-95 flex flex-col items-center justify-center p-4 z-50 overflow-y-auto">
                     <div className="bg-gray-800 text-white rounded-lg shadow-xl p-6 max-w-md w-full">
                         <div className="flex justify-between items-center mb-4">
-                            <h2 className="text-2xl font-bold text-yellow-400">Scoring Guide</h2>
+                            <h2 className="text-2xl font-bold text-yellow-400">Scoring Matrix</h2>
                             <button onClick={onClose} className="text-gray-400 hover:text-white"><CloseIcon className="w-6 h-6" /></button>
                         </div>
                         <div className="space-y-2 font-mono text-sm">
@@ -359,11 +358,11 @@
             const HistoryView = () => (
                 <div className="p-6 text-white max-w-xl mx-auto flex flex-col h-full">
                     <div className="flex justify-between items-center mb-6">
-                        <h1 className="text-3xl font-black text-indigo-400">Farkle Logs</h1>
+                        <h1 className="text-3xl font-black text-indigo-400">Travel Logs</h1>
                         <button onClick={() => setCurrentView('scorer')} className="bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded-lg font-bold">Back</button>
                     </div>
                     <div className="space-y-4 overflow-y-auto flex-grow">
-                        {history.length === 0 ? <p className="text-gray-500 text-center mt-10">No saved games found.</p> : 
+                        {history.length === 0 ? <p className="text-gray-500 text-center mt-10">Vault is empty.</p> : 
                             history.map(game => {
                                 const sorted = [...(game.players || [])].sort((a,b) => b.score - a.score);
                                 return (
@@ -393,19 +392,19 @@
                         <div className="flex justify-between items-center mb-6">
                             <h1 className="text-3xl font-bold">Scores</h1>
                             <div className="flex space-x-2">
-                                <button onClick={() => setCurrentView('display')} className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded-full shadow"><TrophyIcon className="inline-block mr-1 h-5 w-5" /> Display</button>
+                                <button onClick={() => setCurrentView('display')} className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded-full shadow"><TrophyIcon className="inline-block mr-1 h-5 w-5" /> Arena</button>
                                 <button onClick={() => setShowScoringGuide(true)} className="bg-gray-600 text-white font-bold py-2 px-4 rounded-full">Scoring</button>
                             </div>
                         </div>
                         
                         <div className="flex items-center justify-between mb-4 bg-gray-200 dark:bg-gray-800 p-3 rounded-lg text-sm">
-                            <span className="font-semibold">ID: <span className="text-indigo-500 font-bold">{gameId}</span> ({gameLocation})</span>
-                            <button onClick={handleLeaveGame} className="text-red-500 font-semibold">Leave</button>
+                            <span className="font-semibold">Room: <span className="text-indigo-500 font-bold">{gameId}</span> ({gameLocation})</span>
+                            <button onClick={handleLeaveGame} className="text-red-500 font-semibold">Exit</button>
                         </div>
 
                         <div className="mb-6">
                             <div className="flex space-x-2">
-                                <input ref={nameInputRef} type="text" placeholder="Player name" className="flex-grow p-3 rounded-lg bg-white dark:bg-gray-800 border-2 dark:border-gray-700" onKeyDown={(e) => e.key === 'Enter' && handleAddPlayer()} />
+                                <input ref={nameInputRef} type="text" placeholder="Add player name" className="flex-grow p-3 rounded-lg bg-white dark:bg-gray-800 border-2 dark:border-gray-700" onKeyDown={(e) => e.key === 'Enter' && handleAddPlayer()} />
                                 <button onClick={handleAddPlayer} className="bg-green-500 text-white p-3 rounded-lg"><PlusIcon className="h-6 w-6" /></button>
                             </div>
                         </div>
@@ -420,16 +419,16 @@
                                     <div className="flex items-center space-x-2">
                                         <input ref={el => scoreInputRefs.current[index] = el} type="text" inputMode="numeric" placeholder="Points" className="w-20 p-2 rounded bg-gray-50 dark:bg-gray-700 text-center" onKeyDown={(e) => e.key === 'Enter' && handleUpdateScore(index)} />
                                         <button onClick={() => handleUpdateScore(index)} className="bg-indigo-500 text-white p-2 rounded"><PlusIcon className="h-5 w-5" /></button>
-                                        <button onClick={() => handleConfirm(() => handleDeletePlayer(index), 'Remove player?')} className="bg-red-500 text-white p-2 rounded"><CloseIcon className="h-5 w-5" /></button>
+                                        <button onClick={() => handleConfirm(() => handleDeletePlayer(index), 'Remove this member?')} className="bg-red-500 text-white p-2 rounded"><CloseIcon className="h-5 w-5" /></button>
                                     </div>
                                 </div>
                             ))}
                         </div>
 
                         <div className="mt-6 flex space-x-4">
-                            <button onClick={() => handleConfirm(handleResetScores, 'Reset current matrix scores?')} className="flex-1 bg-red-500 text-white font-bold py-3 rounded-lg">Reset</button>
+                            <button onClick={() => handleConfirm(handleResetScores, 'Reset session scores to 0?')} className="flex-1 bg-red-500 text-white font-bold py-3 rounded-lg">Reset Matrix</button>
                             {players.length > 0 && (
-                                <button onClick={() => handleConfirm(handleFinalizeGame, 'Archive session permanently into Travel Logs?')} className="flex-1 bg-emerald-600 text-white font-bold py-3 rounded-lg">Archive Match</button>
+                                <button onClick={() => handleConfirm(handleFinalizeGame, 'Archive match data into travel vault?')} className="flex-1 bg-emerald-600 text-white font-bold py-3 rounded-lg">Archive Match</button>
                             )}
                         </div>
                     </div>
@@ -446,16 +445,17 @@
                         <div className="flex justify-between items-center mb-6">
                             <h1 className="text-4xl font-black tracking-tight">Farkle Arena</h1>
                             <div className="flex space-x-2">
-                                <button onClick={() => setCurrentView('scorer')} className="bg-indigo-600 px-4 py-2 rounded-full font-bold">Edit Mode</button>
+                                <button onClick={() => setCurrentView('scorer')} className="bg-indigo-600 px-4 py-2 rounded-full font-bold">Scorer</button>
                                 <button onClick={() => setShowScoringGuide(true)} className="bg-gray-700 px-4 py-2 rounded-full font-bold">Scoring</button>
                             </div>
                         </div>
 
                         <div className="flex justify-between text-sm text-gray-400 mb-6">
-                            <span>Room Code: <span className="text-yellow-400 font-bold">{gameId}</span></span>
+                            <span>Session Key: <span className="text-yellow-400 font-bold">{gameId}</span></span>
                             <span className="flex items-center"><MapIcon className="w-4 h-4 text-red-400 mr-1"/>{gameLocation}</span>
                         </div>
 
+                        {/* FORCED SINGLE VERTICAL COLUMN GRID */}
                         <div className="flex-grow grid grid-cols-1 gap-4 overflow-y-auto">
                             {players.map((player) => {
                                 const isLeader = hasWinner && player.score === winningScore;
