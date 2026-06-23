@@ -8,6 +8,11 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+    
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+
     <script>
       tailwind.config = {
         theme: {
@@ -39,11 +44,7 @@
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 
-    <script type="text/plain" data-type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, doc, onSnapshot, setDoc, getDoc, updateDoc, collection, query, where, getDocs, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-        
+    <script>
         const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {
             apiKey: "AIzaSyClININqtn0HoO3ovVj8nJPlWKn9N5Lx90",
             authDomain: "farkle-scoreboard-afe9e.firebaseapp.com",
@@ -54,22 +55,12 @@
             measurementId: "G-2N90ZMMJYC"
         };
 
-        const app = initializeApp(firebaseConfig);
-        window.db = getFirestore(app);
-        window.auth = getAuth(app);
-        window.onAuthStateChanged = onAuthStateChanged;
-        window.signInAnonymously = signInAnonymously;
-        window.signInWithCustomToken = signInWithCustomToken;
-        window.doc = doc;
-        window.onSnapshot = onSnapshot;
-        window.setDoc = setDoc;
-        window.getDoc = getDoc;
-        window.updateDoc = updateDoc;
-        window.collection = collection;
-        window.query = query;
-        window.where = where;
-        window.getDocs = getDocs;
-        window.serverTimestamp = serverTimestamp;
+        // Initialize Firebase using the standard compat style
+        if (!firebase.apps.length) {
+            const app = firebase.initializeApp(firebaseConfig);
+            window.db = firebase.firestore(app);
+            window.auth = firebase.auth(app);
+        }
     </script>
     
     <script type="text/babel">
@@ -112,7 +103,7 @@
             const [isAuthReady, setIsAuthReady] = useState(false);
             const [userId, setUserId] = useState(null);
             const [loading, setLoading] = useState(true);
-            const [currentView, setCurrentView] = useState('scorer'); // scorer, display, history
+            const [currentView, setCurrentView] = useState('scorer'); 
             const [showScoringGuide, setShowScoringGuide] = useState(false);
             const [error, setError] = useState(null);
             const [showConfirm, setShowConfirm] = useState(false);
@@ -169,11 +160,11 @@
                 }
 
                 setIsGameLoading(true);
-                const docRef = window.doc(window.db, `${COLLECTION_NAME}/${id}`);
+                const docRef = window.db.collection(COLLECTION_NAME).doc(id);
                 
-                unsubscribeFirestoreRef.current = window.onSnapshot(docRef, (docSnap) => {
+                unsubscribeFirestoreRef.current = docRef.onSnapshot((docSnap) => {
                     try {
-                        if (docSnap.exists()) {
+                        if (docSnap.exists) {
                             const data = docSnap.data();
                             const fetchedPlayers = data.players || [];
                             const sortedPlayers = fetchedPlayers.sort((a, b) => b.score - a.score);
@@ -196,21 +187,21 @@
 
             const handleCreateGame = async () => {
                 const newGameId = Math.random().toString(36).substring(2, 7).toUpperCase();
-                const docRef = window.doc(window.db, `${COLLECTION_NAME}/${newGameId}`);
+                const docRef = window.db.collection(COLLECTION_NAME).doc(newGameId);
                 
                 try {
-                    const docSnap = await window.getDoc(docRef);
-                    if (docSnap.exists()) {
+                    const docSnap = await docRef.get();
+                    if (docSnap.exists) {
                         handleCreateGame();
                         return;
                     }
                     
                     const loc = await fetchCityName();
-                    await window.setDoc(docRef, { 
+                    await docRef.set({ 
                         players: [], 
                         location: loc,
                         status: 'active',
-                        createdAt: window.serverTimestamp()
+                        createdAt: firebase.firestore.FieldValue.serverTimestamp()
                     });
                     setGameId(newGameId);
                     setGameLocation(loc);
@@ -225,10 +216,10 @@
                 const joinGameId = gameIdInputRef.current.value.trim().toUpperCase();
                 if (!joinGameId) return;
 
-                const docRef = window.doc(window.db, `${COLLECTION_NAME}/${joinGameId}`);
-                const docSnap = await window.getDoc(docRef);
+                const docRef = window.db.collection(COLLECTION_NAME).doc(joinGameId);
+                const docSnap = await docRef.get();
 
-                if (!docSnap.exists()) {
+                if (!docSnap.exists) {
                     setError(`No game found with ID: '${joinGameId}'.`);
                     return;
                 }
@@ -241,10 +232,10 @@
             const handleFinalizeGame = async () => {
                 if (!gameId) return;
                 try {
-                    const docRef = window.doc(window.db, `${COLLECTION_NAME}/${gameId}`);
-                    await window.updateDoc(docRef, { 
+                    const docRef = window.db.collection(COLLECTION_NAME).doc(gameId);
+                    await docRef.update({ 
                         status: 'finished', 
-                        finishedAt: window.serverTimestamp() 
+                        finishedAt: firebase.firestore.FieldValue.serverTimestamp() 
                     });
                     handleLeaveGame();
                     await fetchHistory();
@@ -256,11 +247,9 @@
             const fetchHistory = async () => {
                 try {
                     setIsGameLoading(true);
-                    const q = window.query(
-                        window.collection(window.db, COLLECTION_NAME), 
-                        window.where("status", "==", "finished")
-                    );
-                    const querySnap = await window.getDocs(q);
+                    const querySnap = await window.db.collection(COLLECTION_NAME)
+                        .where("status", "==", "finished")
+                        .get();
                     const games = querySnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
                     
                     games.sort((a, b) => {
@@ -285,21 +274,21 @@
                     setLoading(false);
                     return;
                 }
-                const unsub = window.onAuthStateChanged(window.auth, (user) => {
+                const unsub = window.auth.onAuthStateChanged((user) => {
                     if (user) setUserId(user.uid);
                     setIsAuthReady(true);
                     setLoading(false);
                 });
-                window.signInAnonymously(window.auth);
+                window.auth.signInAnonymously();
                 return () => unsub();
             }, []);
 
             const handleAddPlayer = async () => {
                 const name = nameInputRef.current.value.trim();
                 if (!name || !gameId) return;
-                const docRef = window.doc(window.db, `${COLLECTION_NAME}/${gameId}`);
+                const docRef = window.db.collection(COLLECTION_NAME).doc(gameId);
                 const newPlayers = [...players, { name, score: 0, id: crypto.randomUUID() }];
-                await window.setDoc(docRef, { players: newPlayers }, { merge: true });
+                await docRef.set({ players: newPlayers }, { merge: true });
                 nameInputRef.current.value = '';
             };
 
@@ -308,27 +297,27 @@
                 const scoreToAdd = parseInt(inputElement.value, 10);
                 if (isNaN(scoreToAdd) || scoreToAdd <= 0 || !gameId) return;
 
-                const docRef = window.doc(window.db, `${COLLECTION_NAME}/${gameId}`);
+                const docRef = window.db.collection(COLLECTION_NAME).doc(gameId);
                 const updatedPlayers = players.map((p, idx) =>
                     idx === playerIndex ? { ...p, score: p.score + scoreToAdd } : p
                 );
-                await window.setDoc(docRef, { players: updatedPlayers }, { merge: true });
+                await docRef.set({ updatedPlayers }, { merge: true });
                 inputElement.value = '';
             };
 
             const handleResetScores = async () => {
                 if (!gameId) return;
-                const docRef = window.doc(window.db, `${COLLECTION_NAME}/${gameId}`);
+                const docRef = window.db.collection(COLLECTION_NAME).doc(gameId);
                 const reset = players.map(p => ({ ...p, score: 0 }));
-                await window.setDoc(docRef, { players: reset }, { merge: true });
+                await docRef.set({ players: reset }, { merge: true });
                 setShowConfirm(false);
             };
             
             const handleDeletePlayer = async (playerIndex) => {
                 if (!gameId) return;
-                const docRef = window.doc(window.db, `${COLLECTION_NAME}/${gameId}`);
+                const docRef = window.db.collection(COLLECTION_NAME).doc(gameId);
                 const updated = players.filter((_, idx) => idx !== playerIndex);
-                await window.setDoc(docRef, { players: updated });
+                await docRef.set({ players: updated });
                 setShowConfirm(false);
             };
             
