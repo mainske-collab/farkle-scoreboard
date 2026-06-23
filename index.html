@@ -39,7 +39,7 @@
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 
-    <script type="module">
+    <script type="text/plain" data-type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, doc, onSnapshot, setDoc, getDoc, updateDoc, collection, query, where, getDocs, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
@@ -263,7 +263,6 @@
                     const querySnap = await window.getDocs(q);
                     const games = querySnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
                     
-                    // Sort locally in case composite index compilation is still completing
                     games.sort((a, b) => {
                         const timeA = a.finishedAt?.seconds || 0;
                         const timeB = b.finishedAt?.seconds || 0;
@@ -273,7 +272,7 @@
                     setHistory(games);
                     setCurrentView('history');
                 } catch (e) {
-                    setError('History lookup failed. If this is your first time using history, check your console log to click the required automatic Firestore Index configuration link.');
+                    setError('History lookup failed.');
                     console.error(e);
                 } finally {
                     setIsGameLoading(false);
@@ -468,7 +467,6 @@
                             <span className="flex items-center"><MapIcon className="w-4 h-4 text-red-400 mr-1"/>{gameLocation}</span>
                         </div>
 
-                        {/* STACKED VERTICALLY ALWAYS GRID */}
                         <div className="flex-grow grid grid-cols-1 gap-4 overflow-y-auto">
                             {players.map((player) => {
                                 const isLeader = hasWinner && player.score === winningScore;
